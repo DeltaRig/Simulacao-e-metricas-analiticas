@@ -1,5 +1,12 @@
 /**
- * Simulador de fila simples
+ * Simulador de par de fila (sem roteamento)
+ * 
+ * Andamento:
+ *      Variaveis criadas
+ *      Deterministrico alterado
+ *      Falta: 
+ *          Arrumar o processo aleatório
+ *          Adicionar verificações para a rotação da fila2
  * 
  * @author (Daniela Pereira Rigoli)
  * @version (13/08/2020) 
@@ -9,27 +16,43 @@
  * 
  */
 
-package FilaSimples;
+package PardeFilas;
 
-public class FilaSimples{
-    public static void main(final String[] args) {
+public class ParDeFilas{
+    public static void main(String[] args) {
         int operacao = 1;
-        int i = 0;
+        
         double tempo = 0;
-        final double minArrival = 1;
-        final double maxArrival = 2;
-        final double minService = 3;
-        final double maxService = 6;
-        final int capacidade = 3;
+        double saida;
 
-        double[] rndnumbers = {0.3276, 0.8851, 0.1643, 0.5542, 0.6813, 0.7221, 0.9881};
+        double[] rndnumbers = {0.9921, 0.0004, 0.5534, 0.2761, 0.3398, 0.8963, 0.9023, 0.0132, 0.4569, 0.5121, 0.9208, 0.0171, 0.2299, 0.8545, 0.6001, 0.2921};
+        int i = 0;
         int perda = 0;
               
-        Processo[] fila = new Processo[1];
+    
+        //caracteristicas fila1:
+        Processo[] fila1 = new Processo[1];
+        int capacidade1 = 3;
+        //int servidores1 = 2;
+        double proxSaidaS1; //devido a quantidade de servidores
+        double proxSaidaS2;
 
-        //agendo a saida
+        double minArrival1 = 2;
+        double maxArrival1 = 3;
+        double minService1 = 2;
+        double maxService1 = 5;
+
+        //caracteristicas fila2:
+        Processo[] fila2 = new Processo[0];
+        //servers: 1
+        double proxSaida;
+        int capacidade2 = 3;
+        double minService = 3;
+        double maxService = 5.0;
+  
+        //para começar foi determinado
+        // agendo a primeira chegada NO LOCAL
         double chegada = 2;
-        double saida  = (maxService - minService) * pseudoAleatorio(rndnumbers[i]) + minService;
         double chegaProx = chegada + tempo;
         rndnumbers[i] = pseudoAleatorio(rndnumbers[i]);
         if(i < rndnumbers.length){
@@ -37,58 +60,46 @@ public class FilaSimples{
         } else {
             i = 0;
         }
+
         tempo = chegada;
-        double proxSaida = saida + tempo;
+        double proxSaida1 = saida + tempo;
         Processo p = new Processo(chegada, saida, tempo);
-        fila[0] = p;
+        fila1[0] = p;
 
         System.out.println("Operacao: " + operacao + 
             "\nCHEGADA no minuto: " + (chegada));
         operacao++;
-            
-
-        // agendo a proxima chegada
-        chegada = (maxArrival - minArrival) * pseudoAleatorio(rndnumbers[i]) + minArrival;
-        chegaProx = chegada + tempo;
-        rndnumbers[i] = pseudoAleatorio(rndnumbers[i]);
-        if(i < rndnumbers.length){
-            i++;
-        } else {
-            i = 0;
-        }
         
+
+        //automatizado
         while(tempo <= 8.1){
 
             //chegada
             if(tempo >= chegaProx){
                 
-                if(fila.length < capacidade){
-                    final Processo pr = new Processo(chegada, saida, chegaProx); //saida
-                    saida  = (maxService - minService) * pseudoAleatorio(rndnumbers[i]) + minService;
+                if(fila1.length < capacidade1){ //fila1
+                    System.out.println("Operacao: " + operacao + 
+                        "\ntempo para chegar: " + chegada + 
+                        "\nCHEGADA no minuto: " + chegaProx);
+                    operacao++;
+
+                    Processo pr = new Processo(chegada, saida, chegaProx); //saida
+                    saida  = (maxService1 - minService1) * pseudoAleatorio(rndnumbers[i]) + minService1;
                     rndnumbers[i] = pseudoAleatorio(rndnumbers[i]);
                     if(i < rndnumbers.length - 1){
                         i++;
                     } else {
                         i = 0;
                     }
-                    System.out.println("Operacao: " + operacao + 
-                        "\ntempo para chegar: " + chegada + 
-                        "\nCHEGADA no minuto: " + chegaProx);
-                    operacao++;
 
                     //adiciona p no array
-                    final Processo[] filaAtualiza = new Processo[fila.length + 1];
-                    for(int x = 0; x < fila.length; x++){
-                        filaAtualiza[x] = fila[x];
-                    }
-                    filaAtualiza[fila.length] = pr;
-                    fila = filaAtualiza;
+                    adicionaFila(fila1, pr);
                 } else {
                     perda++;
                 }    
 
                 //agenda proxima chegada
-                chegada = (maxArrival - minArrival) * pseudoAleatorio(rndnumbers[i]) + minArrival;
+                chegada = (maxArrival1 - minArrival1) * pseudoAleatorio(rndnumbers[i]) + minArrival1;
                 chegaProx = chegada + tempo;
                 rndnumbers[i] = pseudoAleatorio(rndnumbers[i]);
                 if(i < rndnumbers.length - 1){
@@ -98,14 +109,14 @@ public class FilaSimples{
                 }
             }
 
-            if(tempo >= proxSaida){
+            if(tempo >= proxSaida1){ //ALERTA
                 System.out.println("Operacao: " + operacao + 
                     "\ntempo para atendimento: " + fila[0].getSaida() + 
                     "\nSAIDA no minuto: " + proxSaida);
                 operacao++;
                 
                     //remove 1
-                final Processo[] filaAtualiza = new Processo[fila.length - 1];
+                Processo[] filaAtualiza = new Processo[fila.length - 1];
                 for(int x = 0; x < filaAtualiza.length; x++){
                     filaAtualiza[x] = fila[x + 1];
                 }
@@ -125,14 +136,25 @@ public class FilaSimples{
 
     }
 
-    public static double pseudoAleatorio(double random) {
-        final double euler = Math.E;
+    
+
+    public static double pseudoAleatorio(double random){
+        double euler = Math.E;
 
         random += Math.pow(random, euler) + Math.pow(2, Math.PI) + 0.31;
         random = random * 10;
         random = random - Math.floor(random);
         return random;
         
+    }
+
+    public static Processo[] adicionaFila(Processo[] fila, Processo pr){
+        Processo[] filaAtualiza = new Processo[fila.length + 1];
+            for(int x = 0; x < fila1.length; x++){
+                filaAtualiza[x] = fila[x];
+            }
+            filaAtualiza[fila.length] = pr;
+            return filaAtualiza;
     }
 
 }
