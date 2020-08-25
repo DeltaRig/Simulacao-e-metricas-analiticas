@@ -32,6 +32,9 @@ class Processo {
         this.atendimento = atendimento;
     }
     */
+    public void setTempo(double tempo){
+        this.tempo = tempo;
+    }
 }
 
 

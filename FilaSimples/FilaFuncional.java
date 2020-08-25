@@ -11,7 +11,7 @@
 
 package FilaSimples;
 
-public class FilaSimples{
+public class FilaFuncional{
     public static void main(final String[] args) {
         int operacao = 1;
         int i = 0;
@@ -21,12 +21,11 @@ public class FilaSimples{
         final double minService = 3;
         final double maxService = 6;
         final int capacidade = 3;
-        final int servidores = 1;
 
         double[] rndnumbers = {0.3276, 0.8851, 0.1643, 0.5542, 0.6813, 0.7221, 0.9881};
         int perda = 0;
               
-        Processo[] fila = new Processo[0];
+        Processo[] fila = new Processo[1];
 
         //agendo a saida
         double chegada = 2;
@@ -39,12 +38,12 @@ public class FilaSimples{
             i = 0;
         }
         tempo = chegada;
+        double proxSaida = saida + tempo;
         Processo p = new Processo(chegada, saida, tempo);
-        fila = adicionaFila(fila, p);
+        fila[0] = p;
 
         System.out.println("Operacao: " + operacao + 
-        "\ntempo para chegar: " + chegada + 
-        "\nCHEGADA no minuto: " + chegaProx);
+            "\nCHEGADA no minuto: " + (chegada));
         operacao++;
             
 
@@ -63,24 +62,27 @@ public class FilaSimples{
             //chegada
             if(tempo >= chegaProx){
                 
-                if(fila.length < capacidade){ //fila
-                    System.out.println("Operacao: " + operacao + 
-                        "\ntempo para chegar: " + chegada + 
-                        "\nCHEGADA no minuto: " + chegaProx);
-                    operacao++;
-
-                    
+                if(fila.length < capacidade){
+                    final Processo pr = new Processo(chegada, saida, chegaProx); //saida
                     saida  = (maxService - minService) * pseudoAleatorio(rndnumbers[i]) + minService;
-                    Processo pr = new Processo(chegada, saida, chegaProx); //saida
                     rndnumbers[i] = pseudoAleatorio(rndnumbers[i]);
                     if(i < rndnumbers.length - 1){
                         i++;
                     } else {
                         i = 0;
                     }
+                    System.out.println("Operacao: " + operacao + 
+                        "\ntempo para chegar: " + chegada + 
+                        "\nCHEGADA no minuto: " + chegaProx);
+                    operacao++;
 
                     //adiciona p no array
-                    adicionaFila(fila, pr);
+                    final Processo[] filaAtualiza = new Processo[fila.length + 1];
+                    for(int x = 0; x < fila.length; x++){
+                        filaAtualiza[x] = fila[x];
+                    }
+                    filaAtualiza[fila.length] = pr;
+                    fila = filaAtualiza;
                 } else {
                     perda++;
                 }    
@@ -96,65 +98,41 @@ public class FilaSimples{
                 }
             }
 
-            for(i = 1; i <= servidores; i++){ // começa em 1 pois se tiver 0 servidores ninguém será atendido
-                if(fila.length <= i){ //ALERTA
-                    if(tempo >= (fila[i - 1].getSaida() + fila[i - 1].getTempo())){
-                        System.out.println("Operacao: " + operacao + 
-                        "\ntempo para atendimento: " + fila[i - 1].getSaida() + 
-                        "\nSAIDA no minuto: " + fila[i - 1].getSaida() + fila[i - 1].getTempo());
-                        operacao++;
-                    
-                        //remove 1
-                        remove(fila, i);
-                        //agenda proxima saída
-                        fila[i - 1].setTempo(tempo);
-                    }
+            if(tempo >= proxSaida){
+                System.out.println("Operacao: " + operacao + 
+                    "\ntempo para atendimento: " + fila[0].getSaida() + 
+                    "\nSAIDA no minuto: " + proxSaida);
+                operacao++;
+                
+                    //remove 1
+                final Processo[] filaAtualiza = new Processo[fila.length - 1];
+                for(int x = 0; x < filaAtualiza.length; x++){
+                    filaAtualiza[x] = fila[x + 1];
                 }
+                fila = filaAtualiza;
+                //agenda proxima saída
+                proxSaida = fila[0].getSaida() + tempo;
             }
-            
             
             tempo = tempo + 0.1; //igual ao valor da fila
             
         }
         System.out.println("Total de perdas: " + perda);
         System.out.println("Tempo total: " + tempo);
-        System.out.println("Fila terminou com: " + fila.length + " pessoas");
+        System.out.println("Fila terminou com: " + fila.length + "pessoas");
             
         
 
-    }  
+    }
 
-    public static double pseudoAleatorio(double random){
-        double euler = Math.E;
+    public static double pseudoAleatorio(double random) {
+        final double euler = Math.E;
 
         random += Math.pow(random, euler) + Math.pow(2, Math.PI) + 0.31;
         random = random * 10;
         random = random - Math.floor(random);
         return random;
         
-    }
-
-    public static Processo[] adicionaFila(Processo[] fila, Processo pr){
-        Processo[] filaAtualiza = new Processo[fila.length + 1];
-            for(int x = 0; x < fila.length; x++){
-                filaAtualiza[x] = fila[x];
-            }
-            filaAtualiza[fila.length] = pr;
-            return filaAtualiza;
-    }
-
-    public static Processo[] remove(Processo[] fila, int posicao){
-        Processo[] filaAtualiza = new Processo[fila.length - 1];
-        int cont = 0;
-            for(int x = 0; x < fila.length; x++){
-                if(cont < filaAtualiza.length){
-                    if(x != posicao){
-                        filaAtualiza[cont] = fila[x];
-                        cont++;
-                    }
-                }                
-            }
-            return filaAtualiza;
     }
 
 }
