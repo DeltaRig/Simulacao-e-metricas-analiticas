@@ -23,6 +23,7 @@ public class App {
     double time = 0;
     double minArrival = 1;
     double maxArrival = 2;
+    double arrivals = 2;
 
         
         boolean verifica = false;
