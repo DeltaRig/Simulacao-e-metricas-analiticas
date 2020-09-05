@@ -1,25 +1,28 @@
-//Matheus lagreca
-public class Fila {
-// Filas g/g/x/y
-// x = servidores
-// y = capacidade de clientes
-// z = qnt de clientes na fila
-	private int servidores;// x
-	private int cap;// y
-	private int tempoChegadaMin;
-	private int tempoChegadaMax;
-	private int tempoAtendimentoMin;
-	private int tempoAtendimentoMax;
-	private int agora;//qnt de pessoas na fila atualmente
+/**
+ * Nomes: Daniela Rigoli e Franciele Constante
+ * Simulação e Métricas Analíticas - 128
+ * Afonso Sales
+ * Versão 10/09/2020
+ */
 
-	public Fila(int servidores, int cap, int tempoChegadaMin, int tempoChegadaMax, int tempoAtendimentoMin,	int tempoAtendimentoMax) {
+public class Fila {
+// G/G/C/K
+	private int servidores; // C
+	private int capacidade; // K
+	private int chegadaMin;
+	private int chegadaMax;
+	private int atendiMin;
+	private int atendiMax;
+	private int estadoAtual; //quantidade de pessoas na fila
+
+	public Fila(int servidores, int capacidade, int chegadaMin, int chegadaMax, int atendiMin,	int atendiMax) {
 		this.servidores = servidores;
-		this.cap = cap;
-		this.tempoChegadaMin = tempoChegadaMin;
-		this.tempoChegadaMax = tempoChegadaMax;
-		this.tempoAtendimentoMin = tempoAtendimentoMin;
-		this.tempoAtendimentoMax = tempoAtendimentoMax;
-		this.agora = 0;//fila comeca em zero
+		this.capacidade = capacidade;
+		this.chegadaMin = chegadaMin;
+		this.chegadaMax = chegadaMax;
+		this.atendiMin = atendiMin;
+		this.atendiMax = atendiMax;
+		this.estadoAtual = 0;
 
 	}
 
@@ -31,59 +34,63 @@ public class Fila {
 		this.servidores = servidores;
 	}
 
-	public int getCap() {
-		return cap;
+	public int getCapacidade() {
+		return capacidade;
 	}
 
-	public void setCap(int cap) {
-		this.cap = cap;
+	public void setCapacidade(int cap) {
+		this.capacidade = cap;
 	}
 
-	public int getTempoChegadaMin() {
-		return tempoChegadaMin;
+	public int getChegadaMin() {
+		return chegadaMin;
 	}
 
-	public void setTempoChegadaMin(int tempoChegadaMin) {
-		this.tempoChegadaMin = tempoChegadaMin;
+	public void setChegadaMin(int chegadaMin) {
+		this.chegadaMin = chegadaMin;
 	}
 
-	public int getTempoChegadaMax() {
-		return tempoChegadaMax;
+	public int getChegadaMax() {
+		return chegadaMax;
 	}
 
-	public void setTempoChegadaMax(int tempoChegadaMax) {
-		this.tempoChegadaMax = tempoChegadaMax;
+	public void setChegadaMax(int chegadaMax) {
+		this.chegadaMax = chegadaMax;
 	}
 
-	public int getTempoAtendimentoMin() {
-		return tempoAtendimentoMin;
+	public int getAtendiMin() {
+		return atendiMin;
 	}
 
-	public void setTempoAtendimentoMin(int tempoAtendimentoMin) {
-		this.tempoAtendimentoMin = tempoAtendimentoMin;
+	public void setAtendiMin(int atendiMin) {
+		this.atendiMin = atendiMin;
 	}
 
-	public int getTempoAtendimentoMax() {
-		return tempoAtendimentoMax;
+	public int getAtendiMax() {
+		return atendiMax;
 	}
 
-	public void setTempoAtendimentoMax(int tempoAtendimentoMax) {
-		this.tempoAtendimentoMax = tempoAtendimentoMax;
+	public void setAtendiMax(int atendiMax) {
+		this.atendiMax = atendiMax;
 	}
 
-	public int getAgora() {
-		return agora;
+	public int getEstadoAtual() {
+		return estadoAtual;
 	}
 
-	public void setAgora(int agora) {
-		this.agora = agora;
+	public void setEstadoAtual(int estadoAtual) {
+		this.estadoAtual = estadoAtual;
 	}
 
 	@Override
 	public String toString() {
-		return "Fila [servidores=" + servidores + ", cap=" + cap + ", tempoChegadaMin=" + tempoChegadaMin
-				+ ", tempoChegadaMax=" + tempoChegadaMax + ", tempoAtendimentoMin=" + tempoAtendimentoMin
-				+ ", tempoAtendimentoMax=" + tempoAtendimentoMax + ", agora=" + agora + "]";
+		return "Dados da fila:\nServidores = " + servidores + ";\n" +
+			"Capacidade = " + capacidade + ";\n" +
+			"Tempo mínimo de chegada = " + chegadaMin + ";\n" +
+			"Tempo máximo de chegada = " + chegadaMax + ";\n" +
+			"Tempo mínimo de atendimento = " + atendiMin + ";\n" +
+			"Tempo máximo de atendimento = " + atendiMax + ";\n" +
+			"Estado atual da fila = " + estadoAtual + "\n";
 	}
 	
 	

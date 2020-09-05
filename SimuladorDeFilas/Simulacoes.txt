@@ -1,0 +1,50 @@
+
+
+Dados da fila:
+Servidores = 1;
+Capacidade = 5;
+Tempo mínimo de chegada = 2;
+Tempo máximo de chegada = 4;
+Tempo mínimo de atendimento = 3;
+Tempo máximo de atendimento = 5;
+Estado atual da fila = 0
+
+G/G/1/5
+
+Digite o tempo para a primeira chegada:
+3
+Estado          Total           Porcent
+0               3.00            0.00
+1               5.65            0.00
+2               11.17           0.01
+3               11.17           0.01
+4               61397.60        37.12
+5               103983.06       62.86
+Perdas: 14780
+Tempo Total: 165412
+
+-=-=-=-=-=-=-=-=-=-=-
+
+
+Dados da fila:
+Servidores = 2;
+Capacidade = 5;
+Tempo mínimo de chegada = 2;
+Tempo máximo de chegada = 4;
+Tempo mínimo de atendimento = 3;
+Tempo máximo de atendimento = 5;
+Estado atual da fila = 0
+
+G/G/2/5
+
+Digite o tempo para a primeira chegada: 
+3
+Estado          Total           Porcent
+0               3.00            0.00
+1               133418.18               72.74
+2               49998.00                27.26
+3               0.00            0.00
+4               0.00            0.00
+5               0.00            0.00
+Perdas: 0
+Tempo Total: 183419

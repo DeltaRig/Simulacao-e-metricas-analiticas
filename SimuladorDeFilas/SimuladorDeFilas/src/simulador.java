@@ -1,223 +1,181 @@
+/**
+ * Nomes: Daniela Rigoli e Franciele Constante
+ * Simulação e Métricas Analíticas - 128
+ * Afonso Sales
+ * Versão 10/09/2020
+ */
+
 import java.util.ArrayList;
 import java.util.Scanner;
-//Matheus lagreca
+
 public class simulador {
 	static Scanner entrada = new Scanner(System.in);
-	static GeradorNumerosAleatorios ger = new GeradorNumerosAleatorios();
-	static final int operacao = 100000;
-	static Fila fil;
-	static ArrayList<Double> estadoFila = new ArrayList<>();
+
+	static GeradorNumerosAleatorios geradorNums = new GeradorNumerosAleatorios();
+
+	static Fila fila;
+
+	static ArrayList<Double> estadoFila = new ArrayList<>(); 
 	static ArrayList<Evento> listaEvento = new ArrayList<>();
 	static ArrayList<Double> numerosAleatorios = new ArrayList<>();
-	static double tempoTotal = 0; // diferenca entre tempos
-	static double tempoDecorrido = 0; // tempo real
-	static int perda = 0; // qnts chegadas cairam
-	static double percent, estadoTemp;
-
-	/*
-	 * validar G/G/1/5, chegadas entre 3..5, atendimento entre 4..6 G/G/2/5,
-	 * chegadas entre 3..5, atendimento entre 4..6
-	 */
+	
+	static final int OPERACAO = 100000;
+	static int perda = 0; // usado para contar as perdas
+	static double tempoSimul = 0; // tempo total da simulação
+	static double intervTempo = 0; // intervalo entre os tempos
+	static double percent, estadoTemp; 
 
 	public static void main(String[] args) {
-		// setup da fila
+		// Dados necessários | arrumar para puxar de um arquivo depois
 		System.out.println("Digite a quantidade de servidores da fila: ");
-		int serv = entrada.nextInt();
+		int servidores = entrada.nextInt();
 		System.out.println("Digite a capacidade maxima da fila: ");
-		int capa = entrada.nextInt();
+		int capacidade = entrada.nextInt();
 		System.out.println("Digite o tempo de chegada min: ");
-		int cheMin = entrada.nextInt();
+		int chegaMin = entrada.nextInt();
 		System.out.println("Digite o tempo de chegada max: ");
-		int cheMax = entrada.nextInt();
+		int chegaMax = entrada.nextInt();
 		System.out.println("Digite o tempo de atendimento min: ");
-		int ateMin = entrada.nextInt();
+		int atendiMin = entrada.nextInt();
 		System.out.println("Digite o tempo de atendimento max: ");
-		int ateMax = entrada.nextInt();
+		int atendiMax = entrada.nextInt();
 
-		fil = new Fila(serv, capa, cheMin, cheMax, ateMin, ateMax);
+		fila = new Fila(servidores, capacidade, chegaMin, chegaMax, atendiMin, atendiMax);
 
-		System.out.println(fil.toString());
+		System.out.println(fila.toString());
 
-		// setup das demais configs
-		System.out.println("Digite o estado inicial de chegada: ");
-		double estInic = entrada.nextDouble();
+		System.out.println("Digite o tempo para a primeira chegada: ");
+		double primChega = entrada.nextDouble();
 
-		// esse for controla quantos nros aleatorios existem
-		for (int i = 0; i < operacao; i++) {
-			numerosAleatorios.add(ger.recebeRandomEntre(0, 1));
+		// gera os números aleatórios necessários para a quant de operações
+		for (int i = 0; i < OPERACAO; i++) {
+			numerosAleatorios.add(geradorNums.recebeAletEntre(0, 1));
 		}
 
-		// seta o array para ter o tamanho da fila
-		for (int i = 0; i < capa + 1; i++) {
+		// define tamanho da fila
+		for (int i = 0; i < capacidade + 1; i++) {
 			estadoFila.add(0.0);
 		}
 
-		filaSimples(fil, estInic);
-		
-		for (int i = 0; i <= fil.getCap(); i++) {
+		filaSimples(fila, primChega);
+		System.out.println("G/G/" + servidores + "/" + capacidade + "\ngit");
+		System.out.println("Estado\t\tTotal\t\tPorcent");
+		for (int i = 0; i <= fila.getCapacidade(); i++) {
 			estadoTemp = estadoFila.get(i);
-			percent = estadoTemp * 100 / tempoDecorrido;
-			System.out.printf("Tempo total que %d ficaram na fila: %.2f, ou seja, %.2f em porcentagem \n", i, estadoTemp, percent);
+			percent = estadoTemp * 100 / tempoSimul;
+			System.out.printf("%d\t\t%.2f\t\t%.2f\n", i, estadoTemp, percent);
 		}
-		System.out.println("perdas: " + perda);
-		System.out.printf("tempo Total: %.0f", tempoDecorrido);
+		System.out.println("Perdas: " + perda);
+		System.out.printf("Tempo Total: %.0f", tempoSimul);
 	}
-	// metodos utilizados na simulação
 
-	// executa algoritmo fila simples
+
 	private static void filaSimples(Fila fi, double inicio) {
-		tempoDecorrido = 0;
+		tempoSimul = 0;
 		chegada(inicio);
 		double menorTempo = 0;
-		int posMenor = 0;
+		int posicaoMenor = 0;
 
-		// enquanto ainda existirem numeros aleatorios na lista...
+		
 		while (!numerosAleatorios.isEmpty()) {
-			// verifica qual evento vem primeiro e executa
-			// verifica se fila esta cheia e o proximo evento n for chegada
-			// consume evento e agenda chegada
-			if (fil.getAgora() == fil.getCap()) {
+			// verifica o primeiro evento, verifica se fila esta cheia e se o proximo evento não é de chegada
+			// remove o evento e agendaa próxima chegada
+			if (fila.getEstadoAtual() == fila.getCapacidade()) {
 
 				menorTempo = listaEvento.get(0).getTempo();
-				posMenor = 0;
+				posicaoMenor = 0;
 				for (int i = 0; i < listaEvento.size(); i++) {
-					// pega a saida com menor tempo
-					if (listaEvento.get(posMenor).getTempo() > listaEvento.get(i).getTempo()) {
+
+					if (listaEvento.get(posicaoMenor).getTempo() > listaEvento.get(i).getTempo()) {
 						menorTempo = listaEvento.get(i).getTempo();
-						posMenor = i;
+						posicaoMenor = i;
 					}
 				}
-				// se evento n for saida
-				if (listaEvento.get(posMenor).getTipo() == 1) {
+				// se evento não for de saída
+				if (listaEvento.get(posicaoMenor).getTipo() == 1) {
 					perda++;
 
-					listaEvento.remove(posMenor);
+					listaEvento.remove(posicaoMenor);
 					chegada(menorTempo);
 				} else {
 					saida(menorTempo);
-					listaEvento.remove(posMenor);
+					listaEvento.remove(posicaoMenor);
 				}
 
-			} else {
-				// caso fila nao cheia
+			} else { // fila não estando cheia
 				menorTempo = listaEvento.get(0).getTempo();
-				posMenor = 0;
+				posicaoMenor = 0;
 				for (int i = 0; i < listaEvento.size(); i++) {
-					if (listaEvento.get(posMenor).getTempo() > listaEvento.get(i).getTempo()) {
+					if (listaEvento.get(i).getTempo() < listaEvento.get(posicaoMenor).getTempo()) {
 						menorTempo = listaEvento.get(i).getTempo();
-						posMenor = i;
+						posicaoMenor = i;
 					}
 
 				}
 
-				// chegada
-				if (listaEvento.get(posMenor).getTipo() == 1) {
-
+				if (listaEvento.get(posicaoMenor).getTipo() == 1) {
 					chegada(menorTempo);
-					listaEvento.remove(posMenor);
-
+					listaEvento.remove(posicaoMenor);
 				}
-				// saida
-				else if (listaEvento.get(posMenor).getTipo() == 0) {
+				else if (listaEvento.get(posicaoMenor).getTipo() == 0) {
 					saida(menorTempo);
-					listaEvento.remove(posMenor);
+					listaEvento.remove(posicaoMenor);
 				}
 				menorTempo = 0;
-				posMenor = 0;
+				posicaoMenor = 0;
 			}
 		}
 
 	}
 
-	// chegada
 	private static void chegada(double tempo) {
+		int pessoasNaFila = fila.getEstadoAtual();
 
-		int posFila = fil.getAgora();
 		contabilizaTempo(tempo);
-
-		if (fil.getAgora() < fil.getCap()) {
-			fil.setAgora(posFila + 1);
-			if (fil.getAgora() <= fil.getServidores()) {
+		if (fila.getEstadoAtual() < fila.getCapacidade()) {
+			fila.setEstadoAtual(pessoasNaFila + 1);
+			if (fila.getEstadoAtual() <= fila.getServidores()) {
 				agendaSaida();
 			}
 		}
 		agendaChegada();
 	}
 
-	// saida
 	private static void saida(double tempo) {
 
 		contabilizaTempo(tempo);
-		int posFila = fil.getAgora();
-		fil.setAgora(posFila - 1);
-		if (fil.getAgora() >= fil.getServidores()) {
+		int posFila = fila.getEstadoAtual();
+		fila.setEstadoAtual(posFila - 1);
+		if (fila.getServidores() <= fila.getEstadoAtual()) {
 			agendaSaida();
 		}
 	}
 
-	// agenda chegada
 	private static void agendaChegada() {
-		double aux = numerosAleatorios.remove(0);
-		double result = tempoDecorrido
-				+ (((fil.getTempoChegadaMax() - fil.getTempoChegadaMin()) * aux) + fil.getTempoChegadaMin());
-		Evento e = new Evento(1, result);
-		listaEvento.add(e);
+		double aux = numerosAleatorios.remove(0);  //utiliza na operação
+		double resultado = tempoSimul + (((fila.getChegadaMax() - fila.getChegadaMin()) * aux) + fila.getChegadaMin());
+		Evento evento = new Evento(1, resultado);
+		listaEvento.add(evento);
 	}
 
-	// agenda saida
 	private static void agendaSaida() {
 		double aux = numerosAleatorios.remove(0);
-		double result = tempoDecorrido + (((fil.getTempoAtendimentoMax() - fil.getTempoAtendimentoMin()) * aux)
-				+ fil.getTempoAtendimentoMin());
+		double resultado = tempoSimul + (((fila.getAtendiMax() - fila.getAtendiMin()) * aux) + fila.getAtendiMin());
 
-		Evento e = new Evento(0, result);
-		listaEvento.add(e);
+		Evento evento = new Evento(0, resultado);
+		listaEvento.add(evento);
 
 	}
 
-	// contabilizatempo
+	//método usado para guardar os tempos com determinada quantida de pessoas
 	private static void contabilizaTempo(double tempo) {
-		// usa uma array que guarda quanto tempo cada posicao da fila teve pessoas
-		// pos 0 = vazia, pos 1 = 1 pessoas
-		// o array deve guardar apenas o tempo
-		int aux = fil.getAgora();
+		int pessoasNaFila = fila.getEstadoAtual();
 
-		// atualiza tempo decorrido
-		// calcula dif decorrido
-		// posicao += tempo da posicao anterior + dif do tempo anterior e o tempo
-		// decorrido
-
-		// guarda tempoDecorrido anterior -->0
-		// verifica tempo novo --> 3
-		// e coloca que a posicaoAgora --> diferenca entra o tempo novo e o decorrido
-
-		double tempoAnterior = tempoDecorrido;
-		tempoDecorrido = tempo;
-		double posTemAux = tempoDecorrido - tempoAnterior;
-		double tempoAux = estadoFila.get(aux) + posTemAux;
-		estadoFila.set(aux, tempoAux);
-
-		/*
-		 * double tempoAnterior = tempoDecorrido; double tempoAux = Math.abs(tempo -
-		 * tempoDecorrido); //dif tempoDecorrido = tempo;
-		 * 
-		 * double tempoPosAux = estadoFila.get(aux); tempoPosAux = tempoPosAux +
-		 * tempoAux; //posicao da fila recebe a diferenca do tempo total
-		 * 
-		 * estadoFila.set(aux, tempoPosAux);
-		 * 
-		 * 
-		 */
-
-		/*
-		 * System.out.println(" "); System.out.println("a fila ficou com  " + aux +
-		 * " pessoas por " + tempoPosAux + " e o tempo decorrido eh  " +
-		 * tempoDecorrido);
-		 */
-
-		// atualizar corretamente o array
-		// ele ta resetando o tempo da posicao em vez de incrementar******
-
+		double tempoAnterior = tempoSimul;
+		tempoSimul = tempo; //atualizo o tempo da simulação
+		double difTempo = tempoSimul - tempoAnterior; //armazena diferença
+		double tempoAux = difTempo + estadoFila.get(pessoasNaFila) ;
+		estadoFila.set(pessoasNaFila, tempoAux);
 	}
 
 }
