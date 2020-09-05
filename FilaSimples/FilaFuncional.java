@@ -46,6 +46,15 @@ public class FilaFuncional{
             "\nCHEGADA no minuto: " + (chegada));
         operacao++;
             
+        //gera proximo
+        saida  = (maxService - minService) * pseudoAleatorio(rndnumbers[i]) + minService;
+        chegaProx = chegada + tempo;
+        rndnumbers[i] = pseudoAleatorio(rndnumbers[i]);
+        if(i < rndnumbers.length){
+            i++;
+        } else {
+            i = 0;
+        }
 
         // agendo a proxima chegada
         chegada = (maxArrival - minArrival) * pseudoAleatorio(rndnumbers[i]) + minArrival;
@@ -119,7 +128,7 @@ public class FilaFuncional{
         }
         System.out.println("Total de perdas: " + perda);
         System.out.println("Tempo total: " + tempo);
-        System.out.println("Fila terminou com: " + fila.length + "pessoas");
+        System.out.println("Fila terminou com: " + fila.length + " pessoas");
             
         
 
@@ -133,6 +142,15 @@ public class FilaFuncional{
         random = random - Math.floor(random);
         return random;
         
+    }
+
+    public static Processo[] adicionaFila(Processo[] fila, Processo pr){
+        Processo[] filaAtualiza = new Processo[fila.length + 1];
+            for(int x = 0; x < fila.length; x++){
+                filaAtualiza[x] = fila[x];
+            }
+            filaAtualiza[fila.length] = pr;
+            return filaAtualiza;
     }
 
 }
