@@ -9,13 +9,13 @@ public class Fila {
 // G/G/C/K
 	private int servidores; // C
 	private int capacidade; // K
-	private int chegadaMin;
-	private int chegadaMax;
-	private int atendiMin;
-	private int atendiMax;
+	private double chegadaMin;
+	private double chegadaMax;
+	private double atendiMin;
+	private double atendiMax;
 	private int estadoAtual; //quantidade de pessoas na fila
 
-	public Fila(int servidores, int capacidade, int chegadaMin, int chegadaMax, int atendiMin,	int atendiMax) {
+	public Fila(int servidores, int capacidade, double chegadaMin, double chegadaMax, double atendiMin,	double atendiMax) {
 		this.servidores = servidores;
 		this.capacidade = capacidade;
 		this.chegadaMin = chegadaMin;
@@ -42,35 +42,35 @@ public class Fila {
 		this.capacidade = cap;
 	}
 
-	public int getChegadaMin() {
+	public double getChegadaMin() {
 		return chegadaMin;
 	}
 
-	public void setChegadaMin(int chegadaMin) {
+	public void setChegadaMin(double chegadaMin) {
 		this.chegadaMin = chegadaMin;
 	}
 
-	public int getChegadaMax() {
+	public double getChegadaMax() {
 		return chegadaMax;
 	}
 
-	public void setChegadaMax(int chegadaMax) {
+	public void setChegadaMax(double chegadaMax) {
 		this.chegadaMax = chegadaMax;
 	}
 
-	public int getAtendiMin() {
+	public double getAtendiMin() {
 		return atendiMin;
 	}
 
-	public void setAtendiMin(int atendiMin) {
+	public void setAtendiMin(double atendiMin) {
 		this.atendiMin = atendiMin;
 	}
 
-	public int getAtendiMax() {
+	public double getAtendiMax() {
 		return atendiMax;
 	}
 
-	public void setAtendiMax(int atendiMax) {
+	public void setAtendiMax(double atendiMax) {
 		this.atendiMax = atendiMax;
 	}
 

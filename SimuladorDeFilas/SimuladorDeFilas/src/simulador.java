@@ -21,9 +21,11 @@ public class simulador {
 	
 	static final int OPERACAO = 100000;
 	static int perda = 0; // usado para contar as perdas
+	static int atendidos = 0;
 	static double tempoSimul = 0; // tempo total da simulação
 	static double intervTempo = 0; // intervalo entre os tempos
 	static double percent, estadoTemp; 
+
 
 	public static void main(String[] args) {
 		// Dados necessários | arrumar para puxar de um arquivo depois
@@ -32,13 +34,13 @@ public class simulador {
 		System.out.println("Digite a capacidade maxima da fila: ");
 		int capacidade = entrada.nextInt();
 		System.out.println("Digite o tempo de chegada min: ");
-		int chegaMin = entrada.nextInt();
+		double chegaMin = entrada.nextInt();
 		System.out.println("Digite o tempo de chegada max: ");
-		int chegaMax = entrada.nextInt();
+		double chegaMax = entrada.nextInt();
 		System.out.println("Digite o tempo de atendimento min: ");
-		int atendiMin = entrada.nextInt();
+		double atendiMin = entrada.nextInt();
 		System.out.println("Digite o tempo de atendimento max: ");
-		int atendiMax = entrada.nextInt();
+		double atendiMax = entrada.nextInt();
 
 		fila = new Fila(servidores, capacidade, chegaMin, chegaMax, atendiMin, atendiMax);
 
@@ -48,7 +50,7 @@ public class simulador {
 		double primChega = entrada.nextDouble();
 
 		// gera os números aleatórios necessários para a quant de operações
-		for (int i = 0; i < OPERACAO; i++) {
+		for (int i = 0; i < geradorNums.getOperacao(); i++) {
 			numerosAleatorios.add(geradorNums.recebeAletEntre(0, 1));
 		}
 
@@ -66,7 +68,8 @@ public class simulador {
 			System.out.printf("%d\t\t%.2f\t\t%.2f\n", i, estadoTemp, percent);
 		}
 		System.out.println("Perdas: " + perda);
-		System.out.printf("Tempo Total: %.0f", tempoSimul);
+		System.out.printf("Tempo Total: %.2f", tempoSimul);
+
 	}
 
 
@@ -146,6 +149,7 @@ public class simulador {
 		contabilizaTempo(tempo);
 		int posFila = fila.getEstadoAtual();
 		fila.setEstadoAtual(posFila - 1);
+		atendidos++;
 		if (fila.getServidores() <= fila.getEstadoAtual()) {
 			agendaSaida();
 		}
