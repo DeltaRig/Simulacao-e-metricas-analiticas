@@ -10,6 +10,7 @@ public class GeradorNumerosAleatorios {
 	private double seed;
 	private double[] alets = { 0.2176, 0.0103, 0.1109, 0.3456, 0.9910, 0.2323, 0.9211, 0.0322, 0.1211, 0.5131};
 	private int count;
+	private int turno;
 
 	//implementar para o usuário poder informar valores aleatórios para semente
 	public GeradorNumerosAleatorios() {
@@ -30,7 +31,24 @@ public class GeradorNumerosAleatorios {
 		
 	}
 
-	/** 
+	public int getTurno(){
+		return turno;
+	}
+
+	public void contaTurno(){
+		turno++;
+	}
+/**
+	public double recebeAletEntre(double low, double high) {
+		
+		alets[turno] = pseudoAleatorio(alets[turno]);
+
+		double result = alets[turno] * (high - low) + low;
+		return result;
+		
+	}
+
+ 
 	public static double pseudoAleatorio(double random) {
         final double euler = Math.E;
 
@@ -39,6 +57,6 @@ public class GeradorNumerosAleatorios {
         random = random - Math.floor(random);
 		return random;   
 		
-    }	*/
+    } */
 }
 

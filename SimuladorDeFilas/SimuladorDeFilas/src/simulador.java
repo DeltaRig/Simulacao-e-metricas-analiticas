@@ -14,14 +14,17 @@ public class simulador {
 	static GeradorNumerosAleatorios geradorNums = new GeradorNumerosAleatorios();
 
 	static Fila fila;
+	//criar array
+
+	static Resultados result = new Resultados();
 
 	static ArrayList<Double> estadoFila = new ArrayList<>(); 
 	static ArrayList<Evento> listaEvento = new ArrayList<>();
 	static ArrayList<Double> numerosAleatorios = new ArrayList<>();
 	
-	static final int OPERACAO = 100000;
+	static final int TURNOS = 1;
+	static final int OPERACAO = 10;
 	static int perda = 0; // usado para contar as perdas
-	static int atendidos = 0;
 	static double tempoSimul = 0; // tempo total da simulação
 	static double intervTempo = 0; // intervalo entre os tempos
 	static double percent, estadoTemp; 
@@ -49,26 +52,30 @@ public class simulador {
 		System.out.println("Digite o tempo para a primeira chegada: ");
 		double primChega = entrada.nextDouble();
 
-		// gera os números aleatórios necessários para a quant de operações
-		for (int i = 0; i < geradorNums.getOperacao(); i++) {
-			numerosAleatorios.add(geradorNums.recebeAletEntre(0, 1));
-		}
-
 		// define tamanho da fila
 		for (int i = 0; i < capacidade + 1; i++) {
 			estadoFila.add(0.0);
 		}
 
-		filaSimples(fila, primChega);
-		System.out.println("G/G/" + servidores + "/" + capacidade + "\ngit");
-		System.out.println("Estado\t\tTotal\t\tPorcent");
-		for (int i = 0; i <= fila.getCapacidade(); i++) {
-			estadoTemp = estadoFila.get(i);
-			percent = estadoTemp * 100 / tempoSimul;
-			System.out.printf("%d\t\t%.2f\t\t%.2f\n", i, estadoTemp, percent);
+		//turnos
+		for(int i = 0; i < TURNOS; i++){
+			// gera os números aleatórios necessários para a quant de operações
+			for (int j = 0; j < geradorNums.getOperacao(); j++) {
+				numerosAleatorios.add(geradorNums.recebeAletEntre(0, 1));
+			}
+			geradorNums.contaTurno();
+
+			//ocorre os eventos
+			filaSimples(fila, primChega);
+			
+			result.addResults(perda, tempoSimul, percent, estadoTemp);
+
+			System.out.println("\nTurno " + geradorNums.getTurno());
 		}
-		System.out.println("Perdas: " + perda);
-		System.out.printf("Tempo Total: %.2f", tempoSimul);
+		result.calculaMedias();
+		System.out.println("\n"+result.resultadoFinal(servidores, capacidade, fila, estadoFila));
+
+		
 
 	}
 
@@ -149,7 +156,6 @@ public class simulador {
 		contabilizaTempo(tempo);
 		int posFila = fila.getEstadoAtual();
 		fila.setEstadoAtual(posFila - 1);
-		atendidos++;
 		if (fila.getServidores() <= fila.getEstadoAtual()) {
 			agendaSaida();
 		}
