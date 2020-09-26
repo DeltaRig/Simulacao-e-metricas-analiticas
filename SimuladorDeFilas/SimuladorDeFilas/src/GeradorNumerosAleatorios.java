@@ -7,15 +7,23 @@
 import java.util.Random;
 
 public class GeradorNumerosAleatorios {
-	private double seed;
-	private double[] alets = { 0.2176, 0.0103, 0.1109, 0.3456, 0.9910, 0.2323, 0.9211, 0.0322, 0.1211, 0.5131};
+	private double[] alets = { 0.2176, 0.0103, 0.1109, 0.3456, 0.9910};
 	private int count;
 	private int turno;
 
+	private long a;
+	private long c;
+	private long m;
+	private long x;
+
+
 	//implementar para o usuário poder informar valores aleatórios para semente
 	public GeradorNumerosAleatorios() {
-		//Random pseudo = new Random();
-		//seed = pseudo.nextDouble();
+		a = 4903917;
+        c = 41L;
+		m = 1L<<24;	
+		turno = 0;
+		x = (long) alets[turno];
 		count = 0;
 
 	}
@@ -24,39 +32,33 @@ public class GeradorNumerosAleatorios {
 		return alets.length;
 	}
 
-	public double recebeAletEntre(double low, double high) {
-		double result = alets[count] * (high - low) + low;
-		count++;
-		return result;
-		
-	}
-
+	
 	public int getTurno(){
 		return turno;
 	}
 
 	public void contaTurno(){
 		turno++;
+		x = (long) alets[turno];
 	}
-/**
-	public double recebeAletEntre(double low, double high) {
-		
-		alets[turno] = pseudoAleatorio(alets[turno]);
 
-		double result = alets[turno] * (high - low) + low;
+	//para usar sementes
+	public double recebeAletEntre() {
+		double low = 0;
+		double high = 1;
+		double result = alets[count] * (high - low) + low;
+		count++;
 		return result;
 		
 	}
+	// para usar aleatorios
+	public double recebeAletEntre(double low, double high) {
+		x = Long.remainderUnsigned(a * x + c, m);
 
- 
-	public static double pseudoAleatorio(double random) {
-        final double euler = Math.E;
+		double res = x / m;
+		return res;		
+	}
 
-        random += Math.pow(random, euler) + Math.pow(2, Math.PI) + 0.31;
-        random = random * 10;
-        random = random - Math.floor(random);
-		return random;   
-		
-    } */
+
 }
 

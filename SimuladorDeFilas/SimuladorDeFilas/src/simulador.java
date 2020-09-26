@@ -23,11 +23,13 @@ public class simulador {
 	static ArrayList<Double> numerosAleatorios = new ArrayList<>();
 	
 	static final int TURNOS = 1;
-	static final int OPERACAO = 10;
+	static final int OPERACAO = 100000;
 	static int perda = 0; // usado para contar as perdas
 	static double tempoSimul = 0; // tempo total da simulação
 	static double intervTempo = 0; // intervalo entre os tempos
-	static double percent, estadoTemp; 
+	static double percent, estadoTemp;
+
+	static final boolean usaSeeds = false;
 
 
 	public static void main(String[] args) {
@@ -60,10 +62,18 @@ public class simulador {
 		//turnos
 		for(int i = 0; i < TURNOS; i++){
 			// gera os números aleatórios necessários para a quant de operações
-			for (int j = 0; j < geradorNums.getOperacao(); j++) {
-				numerosAleatorios.add(geradorNums.recebeAletEntre(0, 1));
+			if(usaSeeds){
+				for (int j = 0; j < geradorNums.getOperacao(); j++) {
+					numerosAleatorios.add(geradorNums.recebeAletEntre());
+				}
+				geradorNums.contaTurno();
+			} else {
+				for (int j = 0; j < OPERACAO; j++) {
+					numerosAleatorios.add(geradorNums.recebeAletEntre(0, 1));
+				}
+				geradorNums.contaTurno();
 			}
-			geradorNums.contaTurno();
+			
 
 			//ocorre os eventos
 			filaSimples(fila, primChega);
