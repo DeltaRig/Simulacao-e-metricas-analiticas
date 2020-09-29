@@ -5,6 +5,7 @@
  * Versão 10/09/2020
  */
 
+import java.security.cert.TrustAnchor;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -22,7 +23,7 @@ public class simulador {
 	static ArrayList<Evento> listaEvento = new ArrayList<>();
 	static ArrayList<Double> numerosAleatorios = new ArrayList<>();
 	
-	static final int TURNOS = 1;
+	static final int TURNOS = geradorNums.getAletsLength();
 	static final int OPERACAO = 100000;
 	static int perda = 0; // usado para contar as perdas
 	static double tempoSimul = 0; // tempo total da simulação
@@ -63,7 +64,7 @@ public class simulador {
 		for(int i = 0; i < TURNOS; i++){
 			// gera os números aleatórios necessários para a quant de operações
 			if(usaSeeds){
-				for (int j = 0; j < geradorNums.getOperacao(); j++) {
+				for (int j = 0; j < geradorNums.getAletsLength(); j++) {
 					numerosAleatorios.add(geradorNums.recebeAletEntre());
 				}
 				geradorNums.contaTurno();
@@ -71,7 +72,11 @@ public class simulador {
 				for (int j = 0; j < OPERACAO; j++) {
 					numerosAleatorios.add(geradorNums.recebeAletEntre(0, 1));
 				}
-				geradorNums.contaTurno();
+				System.out.println("\nTurno " + geradorNums.getTurno());
+				if(geradorNums.getTurno() < TURNOS -1){
+					geradorNums.contaTurno();
+				}
+				
 			}
 			
 
@@ -80,7 +85,7 @@ public class simulador {
 			
 			result.addResults(perda, tempoSimul, percent, estadoTemp);
 
-			System.out.println("\nTurno " + geradorNums.getTurno());
+			
 		}
 		result.calculaMedias();
 		System.out.println("\n"+result.resultadoFinal(servidores, capacidade, fila, estadoFila));

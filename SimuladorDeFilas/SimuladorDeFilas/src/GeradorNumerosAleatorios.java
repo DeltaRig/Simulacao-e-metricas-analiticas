@@ -28,7 +28,7 @@ public class GeradorNumerosAleatorios {
 
 	}
 
-	public int getOperacao(){
+	public int getAletsLength(){
 		return alets.length;
 	}
 
