@@ -7,21 +7,21 @@
 import java.util.Random;
 
 public class GeradorNumerosAleatorios {
-	private double[] alets = { 0.2176, 0.0103, 0.1109, 0.3456, 0.9910};
+	private double[] alets = {1, 2, 3, 4, 5};
 	private int count;
 	private int turno;
 
-	private long a;
-	private long c;
-	private long m;
+	private int a;
+	private int c;
+	private int m;
 	private long x;
 
 
 	//implementar para o usuário poder informar valores aleatórios para semente
 	public GeradorNumerosAleatorios() {
 		a = 4903917;
-        c = 41L;
-		m = 1L<<24;	
+        c = 41;
+		m = Integer.MAX_VALUE;	
 		turno = 0;
 		x = (long) alets[turno];
 		count = 0;

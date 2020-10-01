@@ -23,7 +23,7 @@ public class simulador {
 	static ArrayList<Evento> listaEvento = new ArrayList<>();
 	static ArrayList<Double> numerosAleatorios = new ArrayList<>();
 	
-	static final int TURNOS = geradorNums.getAletsLength();
+	static int turnos = geradorNums.getAletsLength();
 	static final int OPERACAO = 100000;
 	static int perda = 0; // usado para contar as perdas
 	static double tempoSimul = 0; // tempo total da simulação
@@ -61,19 +61,19 @@ public class simulador {
 		}
 
 		//turnos
-		for(int i = 0; i < TURNOS; i++){
+		for(int i = 0; i < turnos; i++){
 			// gera os números aleatórios necessários para a quant de operações
 			if(usaSeeds){
 				for (int j = 0; j < geradorNums.getAletsLength(); j++) {
 					numerosAleatorios.add(geradorNums.recebeAletEntre());
 				}
-				geradorNums.contaTurno();
+				turnos = 1;
 			} else {
 				for (int j = 0; j < OPERACAO; j++) {
 					numerosAleatorios.add(geradorNums.recebeAletEntre(0, 1));
 				}
 				System.out.println("\nTurno " + geradorNums.getTurno());
-				if(geradorNums.getTurno() < TURNOS -1){
+				if(geradorNums.getTurno() < turnos -1){
 					geradorNums.contaTurno();
 				}
 				
@@ -100,34 +100,14 @@ public class simulador {
 		chegada(inicio);
 		double menorTempo = 0;
 		int posicaoMenor = 0;
-
+		//getEvento do escalonador - para saber se é chegada ou saida
+		//estado < capacidade
 		
 		while (!numerosAleatorios.isEmpty()) {
 			// verifica o primeiro evento, verifica se fila esta cheia e se o proximo evento não é de chegada
 			// remove o evento e agendaa próxima chegada
-			if (fila.getEstadoAtual() == fila.getCapacidade()) {
-
-				menorTempo = listaEvento.get(0).getTempo();
-				posicaoMenor = 0;
-				for (int i = 0; i < listaEvento.size(); i++) {
-
-					if (listaEvento.get(posicaoMenor).getTempo() > listaEvento.get(i).getTempo()) {
-						menorTempo = listaEvento.get(i).getTempo();
-						posicaoMenor = i;
-					}
-				}
-				// se evento não for de saída
-				if (listaEvento.get(posicaoMenor).getTipo() == 1) {
-					perda++;
-
-					listaEvento.remove(posicaoMenor);
-					chegada(menorTempo);
-				} else {
-					saida(menorTempo);
-					listaEvento.remove(posicaoMenor);
-				}
-
-			} else { // fila não estando cheia
+			
+			if (fila.getEstadoAtual() < fila.getCapacidade()) { // fila não estando cheia
 				menorTempo = listaEvento.get(0).getTempo();
 				posicaoMenor = 0;
 				for (int i = 0; i < listaEvento.size(); i++) {
@@ -148,6 +128,27 @@ public class simulador {
 				}
 				menorTempo = 0;
 				posicaoMenor = 0;
+				
+			} else {  //resulta em perda
+				menorTempo = listaEvento.get(0).getTempo();
+				posicaoMenor = 0;
+				for (int i = 0; i < listaEvento.size(); i++) {
+
+					if (listaEvento.get(posicaoMenor).getTempo() > listaEvento.get(i).getTempo()) {
+						menorTempo = listaEvento.get(i).getTempo();
+						posicaoMenor = i;
+					}
+				}
+				// se evento não for de saída
+				if (listaEvento.get(posicaoMenor).getTipo() == 1) {
+					perda++;
+
+					listaEvento.remove(posicaoMenor);
+					chegada(menorTempo);
+				} else {
+					saida(menorTempo);
+					listaEvento.remove(posicaoMenor);
+				}
 			}
 		}
 
