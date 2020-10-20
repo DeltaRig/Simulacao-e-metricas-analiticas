@@ -5,14 +5,20 @@
  * Versão 10/09/2020
  */
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.security.cert.TrustAnchor;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class simulador {
 	static Scanner entrada = new Scanner(System.in);
 
-	static GeradorNumerosAleatorios geradorNums = new GeradorNumerosAleatorios();
+	static GeradorNumerosAleatorios geradorNums; //true se for usar números definidos
+	static boolean numDefinido;
+	static double[] listNums;
 
 	static Fila fila;
 	//criar array
@@ -23,37 +29,34 @@ public class simulador {
 	static ArrayList<Evento> listaEvento = new ArrayList<>();
 	static ArrayList<Double> numerosAleatorios = new ArrayList<>();
 	
-	static int turnos = geradorNums.getAletsLength();
-	static final int OPERACAO = 100000;
+	static int turnos;
 	static int perda = 0; // usado para contar as perdas
 	static double tempoSimul = 0; // tempo total da simulação
 	static double intervTempo = 0; // intervalo entre os tempos
 	static double percent, estadoTemp;
 
-	static final boolean usaSeeds = false;
 
+	//variaveis do arquivo de entrada:
+	static double primChega = 0;
+	
+	static int servidores;
+	static int capacidade;
+	static double chegaMin;
+	static double chegaMax;
+	static double atendiMin;
+	static double atendiMax;
 
 	public static void main(String[] args) {
-		// Dados necessários | arrumar para puxar de um arquivo depois
-		System.out.println("Digite a quantidade de servidores da fila: ");
-		int servidores = entrada.nextInt();
-		System.out.println("Digite a capacidade maxima da fila: ");
-		int capacidade = entrada.nextInt();
-		System.out.println("Digite o tempo de chegada min: ");
-		double chegaMin = entrada.nextInt();
-		System.out.println("Digite o tempo de chegada max: ");
-		double chegaMax = entrada.nextInt();
-		System.out.println("Digite o tempo de atendimento min: ");
-		double atendiMin = entrada.nextInt();
-		System.out.println("Digite o tempo de atendimento max: ");
-		double atendiMax = entrada.nextInt();
 
+		//chamar método de leitura
+		entrada();
+		geradorNums = new GeradorNumerosAleatorios(numDefinido, listNums);
+		turnos = geradorNums.maxTurnos();
+		
 		fila = new Fila(servidores, capacidade, chegaMin, chegaMax, atendiMin, atendiMax);
 
 		System.out.println(fila.toString());
 
-		System.out.println("Digite o tempo para a primeira chegada: ");
-		double primChega = entrada.nextDouble();
 
 		// define tamanho da fila
 		for (int i = 0; i < capacidade + 1; i++) {
@@ -62,22 +65,6 @@ public class simulador {
 
 		//turnos
 		for(int i = 0; i < turnos; i++){
-			// gera os números aleatórios necessários para a quant de operações
-			if(usaSeeds){
-				for (int j = 0; j < geradorNums.getAletsLength(); j++) {
-					numerosAleatorios.add(geradorNums.recebeAletEntre());
-				}
-				turnos = 1;
-			} else {
-				for (int j = 0; j < OPERACAO; j++) {
-					numerosAleatorios.add(geradorNums.recebeAletEntre(0, 1));
-				}
-				System.out.println("\nTurno " + geradorNums.getTurno());
-				if(geradorNums.getTurno() < turnos -1){
-					geradorNums.contaTurno();
-				}
-				
-			}
 			
 
 			//ocorre os eventos
@@ -100,17 +87,15 @@ public class simulador {
 		chegada(inicio);
 		double menorTempo = 0;
 		int posicaoMenor = 0;
-		//getEvento do escalonador - para saber se é chegada ou saida
-		//estado < capacidade
 		
-		while (!numerosAleatorios.isEmpty()) {
+		while (geradorNums.getCont() < geradorNums.getOperacoes()) {
 			// verifica o primeiro evento, verifica se fila esta cheia e se o proximo evento não é de chegada
 			// remove o evento e agendaa próxima chegada
 			
 			if (fila.getEstadoAtual() < fila.getCapacidade()) { // fila não estando cheia
 				menorTempo = listaEvento.get(0).getTempo();
 				posicaoMenor = 0;
-				for (int i = 0; i < listaEvento.size(); i++) {
+				for (int i = 0; i < listaEvento.size(); i++) { //verifica qual é o próximo evento
 					if (listaEvento.get(i).getTempo() < listaEvento.get(posicaoMenor).getTempo()) {
 						menorTempo = listaEvento.get(i).getTempo();
 						posicaoMenor = i;
@@ -121,8 +106,7 @@ public class simulador {
 				if (listaEvento.get(posicaoMenor).getTipo() == 1) {
 					chegada(menorTempo);
 					listaEvento.remove(posicaoMenor);
-				}
-				else if (listaEvento.get(posicaoMenor).getTipo() == 0) {
+				} else if (listaEvento.get(posicaoMenor).getTipo() == 0) {
 					saida(menorTempo);
 					listaEvento.remove(posicaoMenor);
 				}
@@ -178,14 +162,14 @@ public class simulador {
 	}
 
 	private static void agendaChegada() {
-		double aux = numerosAleatorios.remove(0);  //utiliza na operação
+		double aux = geradorNums.next();  //utiliza na operação
 		double resultado = tempoSimul + (((fila.getChegadaMax() - fila.getChegadaMin()) * aux) + fila.getChegadaMin());
 		Evento evento = new Evento(1, resultado);
 		listaEvento.add(evento);
 	}
 
 	private static void agendaSaida() {
-		double aux = numerosAleatorios.remove(0);
+		double aux = geradorNums.next();
 		double resultado = tempoSimul + (((fila.getAtendiMax() - fila.getAtendiMin()) * aux) + fila.getAtendiMin());
 
 		Evento evento = new Evento(0, resultado);
@@ -204,4 +188,111 @@ public class simulador {
 		estadoFila.set(pessoasNaFila, tempoAux);
 	}
 
+
+	public static void entrada(){
+		Scanner scan = new Scanner(System.in);
+        
+		boolean verifica = false;
+		String momento = "";
+        
+        
+        do{ 
+            verifica = false;
+            System.out.println("Digite o caminho para o arquivo (com o nome do arquivo)"
+                    + "\nEx.: C:/Users/(nome)/Documents/arquivo.txt");
+        
+            String path = scan.nextLine();
+            
+            try(BufferedReader reader = new BufferedReader(new FileReader(path));){
+                // ler o arquivo e enviar para a tradução
+                for (String linha = reader.readLine(); linha != null; linha = reader.readLine()){
+                    if(linha.length() > 0){
+						if(linha.contains("rndnumbers:")){
+							numDefinido = true;
+
+							linha = reader.readLine(); //vai para próxima linha, que deve começar com "-" quando tiver um numero aleatório
+							List<Double> list = new ArrayList<>();
+
+							while(linha.contains("-")){
+								linha.trim();
+								String[] ops = linha.split(" ");
+								double rnd = Double.parseDouble(ops[1]);
+								list.add(rnd);
+
+								linha = reader.readLine(); 
+							}
+							listNums = new double[list.size()]; 
+							for(int i = 0; i < listNums.length; i++){
+								listNums[i] = list.get(i);
+							}
+						} else if(linha.contains("seeds:")){
+							numDefinido = false;
+
+							linha = reader.readLine(); //vai para próxima linha, que deve começar com "-" quando tiver um numero aleatório
+							List<Double> list = new ArrayList<>();
+
+							while(linha.contains("-")){
+								linha.trim();
+								String[] ops = linha.split(" ");
+								double rnd = Double.parseDouble(ops[1]);
+								list.add(rnd);
+
+								linha = reader.readLine(); 
+							}
+							listNums = new double[list.size()]; 
+							for(int i = 0; i < listNums.length; i++){
+								listNums[i] = list.get(i);
+							}
+
+						}else if(linha.contains("arrivals:")){
+							linha = reader.readLine(); 
+							linha.trim(); 
+							String[] ops = linha.split(":");
+							primChega = Double.parseDouble(ops[1].trim());
+						} else if(linha.contains("queues:")){
+							linha = reader.readLine(); //F1
+
+							linha = reader.readLine(); //servers
+							linha.trim(); 
+							String[] ops = linha.split(":");
+							servidores = Integer.parseInt(ops[1].trim());
+
+							linha = reader.readLine(); //capacity
+							linha.trim();
+							ops = linha.split(":");
+							capacidade = Integer.parseInt(ops[1].trim());
+
+							linha = reader.readLine(); //minArrival
+							linha.trim();
+							ops = linha.split(":");
+							chegaMin = Double.parseDouble(ops[1].trim());
+
+							linha = reader.readLine(); //maxArrival
+							linha.trim();
+							ops = linha.split(":");
+							chegaMax = Double.parseDouble(ops[1].trim());
+
+							linha = reader.readLine(); //minService
+							linha.trim();
+							ops = linha.split(":");
+							atendiMin = Double.parseDouble(ops[1].trim());
+
+							linha = reader.readLine(); //maxService
+							linha.trim();
+							ops = linha.split(":");
+							atendiMax = Double.parseDouble(ops[1].trim());
+						}
+
+                    }
+                }
+                reader.close();
+                verifica = true;
+            } catch (IOException e) {
+                System.out.println("O arquivo não foi encontrado");
+            }
+        }while(verifica == false); // Para quando o arquivo for encontrado
+        
+        
+    }
+	
 }
