@@ -3,7 +3,7 @@ import java.util.Comparator;
 /* Used to schedule events during simulation. */
 public class ScheduleEntry implements Comparator<ScheduleEntry> {
     
-	EventEnum event;
+	TipoEvento evento;
     double tempo;
     QueueStructure origin;
 	QueueStructure destino;
@@ -11,8 +11,8 @@ public class ScheduleEntry implements Comparator<ScheduleEntry> {
 	/* Arrivals require destino != null
 	 * Departures require origin != null
 	 * Passages require both origin and destino != null */
-	public ScheduleEntry(EventEnum event, double tempo, QueueStructure origin, QueueStructure destino) {
-		this.event = event;
+	public ScheduleEntry(TipoEvento evento, double tempo, QueueStructure origin, QueueStructure destino) {
+		this.evento = evento;
 		this.tempo = tempo;
 		this.origin = origin;
 		this.destino = destino;
@@ -23,13 +23,13 @@ public class ScheduleEntry implements Comparator<ScheduleEntry> {
 	}
 	
 	public static ScheduleEntry newArrival(double tempo, QueueStructure destino) {
-		return new ScheduleEntry(EventEnum.ARRIVAL, tempo, null, destino);
+		return new ScheduleEntry(TipoEvento.CHEGADA, tempo, null, destino);
 	}
 	public static ScheduleEntry newDeparture(double tempo, QueueStructure origin) {
-		return new ScheduleEntry(EventEnum.DEPARTURE, tempo, origin, QueueStructure.EXIT);
+		return new ScheduleEntry(TipoEvento.SAIDA, tempo, origin, QueueStructure.EXIT);
 	}
 	public static ScheduleEntry newPassage(double tempo, QueueStructure origin, QueueStructure destino) {
-		return new ScheduleEntry(EventEnum.PASSAGE, tempo, origin, destino);
+		return new ScheduleEntry(TipoEvento.PASSAGEM, tempo, origin, destino);
 	}
 	
 	public int compare(ScheduleEntry se1, ScheduleEntry se2) {
@@ -41,7 +41,7 @@ public class ScheduleEntry implements Comparator<ScheduleEntry> {
     }
 	
 	public ScheduleEntry clone() {
-		return new ScheduleEntry(event, tempo, origin, destino);
+		return new ScheduleEntry(evento, tempo, origin, destino);
 	}
 }
 //===========================================================

@@ -55,7 +55,7 @@ public class QueueSim {
 	
 	private SimulationReport runSimulation(long aletseed, int totalalets) {
 		
-		//Event schedule
+		//evento schedule
 		Comparator<ScheduleEntry> schComparator = new ScheduleEntry();
 		PriorityQueue<ScheduleEntry> schedule = new PriorityQueue<>(schComparator);
 		//First arrivals are offered to the schedule
@@ -68,7 +68,7 @@ public class QueueSim {
         
         while(totalalets > 0) {
             
-            //Process next scheduled event
+            //Process next scheduled evento
             ScheduleEntry se = schedule.poll();
             double variacaoTempo = se.tempo - tempo;
             for(QueueStructure q : estruturaFila) {
@@ -77,7 +77,7 @@ public class QueueSim {
             tempo += variacaoTempo; //update simulation clock
             
             
-            if(se.event == EventEnum.ARRIVAL) {
+            if(se.evento == TipoEvento.CHEGADA) {
                 QueueStructure dest = se.destino;
             	if(!dest.isFull()) { //Queue can receive the client
                     dest.addClient();
@@ -92,7 +92,7 @@ public class QueueSim {
             
             
             
-            } else if(se.event == EventEnum.PASSAGE) {
+            } else if(se.evento == TipoEvento.PASSAGEM) {
             	QueueStructure ori = se.origin;
             	QueueStructure dest = se.destino;
             	ori.removeClient();
@@ -141,15 +141,15 @@ public class QueueSim {
 	
 	private void scheduleArrival(PriorityQueue<ScheduleEntry> schedule, QueueStructure destino, double time, RNG rng) {
 		double randomNumber = rng.next();
-		double eventTime = time + (destino.maxChegada - destino.minChegada) * randomNumber + destino.minChegada;
-		schedule.offer(ScheduleEntry.newArrival(eventTime, destino));
+		double eventoTime = time + (destino.maxChegada - destino.minChegada) * randomNumber + destino.minChegada;
+		schedule.offer(ScheduleEntry.newArrival(eventoTime, destino));
 	}
 	
 	private int scheduleDeparture(PriorityQueue<ScheduleEntry> schedule, QueueStructure origin, double time, RNG rng) {
-		//Define event time
+		//Define evento time
 		double randomNumber = rng.next();
 		int aletsUsed = 1;
-		double eventTime = time + (origin.maxServico-origin.minServico) * randomNumber + origin.minServico;
+		double eventoTime = time + (origin.maxServico-origin.minServico) * randomNumber + origin.minServico;
 		
 		QueueStructure dest = null;
 		/* If more than one possible destino, roll the probabilities.
@@ -175,11 +175,11 @@ public class QueueSim {
 			dest = origin.destinos.get(0);
 		}
 		
-		//Generate schedule events accordingly
+		//Generate schedule eventos accordingly
 		if(dest == QueueStructure.EXIT) {//Departure from the system
-			schedule.offer(ScheduleEntry.newDeparture(eventTime, origin));
+			schedule.offer(ScheduleEntry.newDeparture(eventoTime, origin));
 		} else { //Passage from one queue to another
-			schedule.offer(ScheduleEntry.newPassage(eventTime, origin, dest));
+			schedule.offer(ScheduleEntry.newPassage(eventoTime, origin, dest));
 		}
 		
 		return aletsUsed;
