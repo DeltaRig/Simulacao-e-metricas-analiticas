@@ -6,30 +6,30 @@ public class ScheduleEntry implements Comparator<ScheduleEntry> {
 	EventEnum event;
     double time;
     QueueStructure origin;
-	QueueStructure destination;
+	QueueStructure destino;
 	
-	/* Arrivals require destination != null
+	/* Arrivals require destino != null
 	 * Departures require origin != null
-	 * Passages require both origin and destination != null */
-	public ScheduleEntry(EventEnum event, double time, QueueStructure origin, QueueStructure destination) {
+	 * Passages require both origin and destino != null */
+	public ScheduleEntry(EventEnum event, double time, QueueStructure origin, QueueStructure destino) {
 		this.event = event;
 		this.time = time;
 		this.origin = origin;
-		this.destination = destination;
+		this.destino = destino;
 	}
 	
 	public ScheduleEntry() {
 		
 	}
 	
-	public static ScheduleEntry newArrival(double time, QueueStructure destination) {
-		return new ScheduleEntry(EventEnum.ARRIVAL, time, null, destination);
+	public static ScheduleEntry newArrival(double time, QueueStructure destino) {
+		return new ScheduleEntry(EventEnum.ARRIVAL, time, null, destino);
 	}
 	public static ScheduleEntry newDeparture(double time, QueueStructure origin) {
 		return new ScheduleEntry(EventEnum.DEPARTURE, time, origin, QueueStructure.EXIT);
 	}
-	public static ScheduleEntry newPassage(double time, QueueStructure origin, QueueStructure destination) {
-		return new ScheduleEntry(EventEnum.PASSAGE, time, origin, destination);
+	public static ScheduleEntry newPassage(double time, QueueStructure origin, QueueStructure destino) {
+		return new ScheduleEntry(EventEnum.PASSAGE, time, origin, destino);
 	}
 	
 	public int compare(ScheduleEntry se1, ScheduleEntry se2) {
@@ -41,7 +41,7 @@ public class ScheduleEntry implements Comparator<ScheduleEntry> {
     }
 	
 	public ScheduleEntry clone() {
-		return new ScheduleEntry(event, time, origin, destination);
+		return new ScheduleEntry(event, time, origin, destino);
 	}
 }
 //===========================================================

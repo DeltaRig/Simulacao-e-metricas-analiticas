@@ -9,21 +9,21 @@ import java.nio.file.Paths;
 public class QueueSim {
 	
 	
-    private ArrayList<QueueStructure> qs;
+    private ArrayList<QueueStructure> estruturaFila;
     private ArrayList<Long> seeds;
-    private int randoms;
-    private ArrayList<ScheduleEntry> firstArrivals;
+    private int alets;
+    private ArrayList<ScheduleEntry> primChegada;
 	
-    public QueueSim(ArrayList<QueueStructure> qs, ArrayList<Long> seeds, int randoms, ArrayList<ScheduleEntry> firstArrivals) {
-    	this.qs = qs;
+    public QueueSim(ArrayList<QueueStructure> estruturaFila, ArrayList<Long> seeds, int alets, ArrayList<ScheduleEntry> primChegada) {
+    	this.estruturaFila = estruturaFila;
     	this.seeds = seeds;
-    	this.randoms = randoms;
-    	this.firstArrivals = firstArrivals;
+    	this.alets = alets;
+    	this.primChegada = primChegada;
     }
     
     /* Constructs object from file. */
-    public QueueSim(String fileString) throws Exception {
-    	parseFile(fileString);
+    public QueueSim(String nomeArquivo) throws Exception {
+    	parseFile(nomeArquivo);
     }
     
 	public void runSimulation() {
@@ -33,19 +33,18 @@ public class QueueSim {
 		 * the list of time spent on each state of said queue. Since a queue can have
 		 * infinite capacity, this list is created containing empty lists
 		 * (lists with no times for any state). */
-		String[] queueIDs = new String[qs.size()];
-		ArrayList<ArrayList<Double>> stateTimes = new ArrayList<>();
-		for(int i=0; i<qs.size(); i++) {
-			stateTimes.add(new ArrayList<Double>());
-			queueIDs[i] = qs.get(i).id;
+		String[] idsFila = new String[estruturaFila.size()];
+		ArrayList<ArrayList<Double>> temposDeEstado = new ArrayList<>();
+		for(int i=0; i<estruturaFila.size(); i++) {
+			temposDeEstado.add(new ArrayList<Double>());
+			idsFila[i] = estruturaFila.get(i).id;
 		}
-		SimulationReport res = new SimulationReport(queueIDs, 0.0, stateTimes, new double[qs.size()]);
+		SimulationReport res = new SimulationReport(idsFila, 0.0, temposDeEstado, new double[estruturaFila.size()]);
 		
 		
 		for(long r : seeds) {
-			SimulationReport temp = runSimulation(r, randoms);
-			//System.out.println(temp.toString());
-			res.sumSimulation(temp);
+			SimulationReport tempo = runSimulation(r, alets);
+			res.sumSimulation(tempo);
 		}
 		/* Divide the accumulated results by the number of simulations run to obtain
 		 * the average of the results. */
@@ -54,58 +53,58 @@ public class QueueSim {
 		System.out.println(res.toString());
 	}
 	
-	private SimulationReport runSimulation(long randomSeed, int totalRandoms) {
+	private SimulationReport runSimulation(long aletseed, int totalalets) {
 		
 		//Event schedule
 		Comparator<ScheduleEntry> schComparator = new ScheduleEntry();
 		PriorityQueue<ScheduleEntry> schedule = new PriorityQueue<>(schComparator);
 		//First arrivals are offered to the schedule
-        for(ScheduleEntry se : firstArrivals) {
+        for(ScheduleEntry se : primChegada) {
         	schedule.offer(se);
         }
                
-        RNG rng = new RNG(randomSeed);
+        RNG rng = new RNG(aletseed);
         double time = 0;
         
-        while(totalRandoms > 0) {
+        while(totalalets > 0) {
             
             //Process next scheduled event
             ScheduleEntry se = schedule.poll();
-            double timeDelta = se.time-time;
-            for(QueueStructure q : qs) {
-            	q.updateQueueTimes(timeDelta);
+            double variacaoTempo = se.time-time;
+            for(QueueStructure q : estruturaFila) {
+            	q.updateQueueTimes(variacaoTempo);
             }
-            time += timeDelta; //update simulation clock
+            time += variacaoTempo; //update simulation clock
             
             
             if(se.event == EventEnum.ARRIVAL) {
-                QueueStructure dest = se.destination;
+                QueueStructure dest = se.destino;
             	if(!dest.isFull()) { //Queue can receive the client
                     dest.addClient();
                     if(dest.canServeOnArrival()) { //Queue can serve the client
-                        totalRandoms -= scheduleDeparture(schedule, dest, time, rng);
+                        totalalets -= scheduleDeparture(schedule, dest, time, rng);
                     }
                 } else { //Queue full
                     dest.clientsLost++;
                 }
                 scheduleArrival(schedule, dest, time, rng);
-                totalRandoms--;
+                totalalets--;
             
             
             
             } else if(se.event == EventEnum.PASSAGE) {
             	QueueStructure ori = se.origin;
-            	QueueStructure dest = se.destination;
+            	QueueStructure dest = se.destino;
             	ori.removeClient();
                 if(ori.canServeOnDeparture()) { //Origin can serve another client.
-                	totalRandoms -= scheduleDeparture(schedule, ori, time, rng);
+                	totalalets -= scheduleDeparture(schedule, ori, time, rng);
                 }
-                if(!dest.isFull()) { //Destination can take another client.
+                if(!dest.isFull()) { //destino can take another client.
                 	dest.addClient();
-                	if(dest.canServeOnArrival()) { //Destination can serve another client.
-                		totalRandoms -= scheduleDeparture(schedule, dest, time, rng);
+                	if(dest.canServeOnArrival()) { //destino can serve another client.
+                		totalalets -= scheduleDeparture(schedule, dest, time, rng);
                 	}
-            	} else { //Destination full. Client lost.
+            	} else { //destino full. Client lost.
             		dest.clientsLost++;
             	}
             
@@ -115,65 +114,65 @@ public class QueueSim {
             	QueueStructure ori = se.origin;
             	ori.removeClient();
             	if(ori.canServeOnDeparture()) { //Can serve one more client
-            		totalRandoms -= scheduleDeparture(schedule, ori, time, rng);
+            		totalalets -= scheduleDeparture(schedule, ori, time, rng);
             	}
             }
         }
         
         //Simulation finished. Make report.
         ArrayList<ArrayList<Double>> qTimes = new ArrayList<>();
-        double[] clientsLost = new double[qs.size()];
-        String[] queueIDs = new String[qs.size()];
-        for(int i=0; i<qs.size(); i++) {
-        	queueIDs[i] = qs.get(i).id;
-        	qTimes.add(qs.get(i).stateTimes);
-        	clientsLost[i] = qs.get(i).clientsLost;
+        double[] clientsLost = new double[estruturaFila.size()];
+        String[] idsFila = new String[estruturaFila.size()];
+        for(int i=0; i<estruturaFila.size(); i++) {
+        	idsFila[i] = estruturaFila.get(i).id;
+        	qTimes.add(estruturaFila.get(i).temposDeEstado);
+        	clientsLost[i] = estruturaFila.get(i).clientsLost;
         }
         
-        SimulationReport sr = new SimulationReport(queueIDs, time, qTimes, clientsLost);
+        SimulationReport sr = new SimulationReport(idsFila, time, qTimes, clientsLost);
         
         //Reset the state of all queues.
-        for(QueueStructure q : qs) {
+        for(QueueStructure q : estruturaFila) {
         	q.resetSimulationVariables();
         }
         
         return sr;
 	}
 	
-	private void scheduleArrival(PriorityQueue<ScheduleEntry> schedule, QueueStructure destination, double time, RNG rng) {
+	private void scheduleArrival(PriorityQueue<ScheduleEntry> schedule, QueueStructure destino, double time, RNG rng) {
 		double randomNumber = rng.next();
-		double eventTime = time + (destination.arrivalMax-destination.arrivalMin) * randomNumber + destination.arrivalMin;
-		schedule.offer(ScheduleEntry.newArrival(eventTime, destination));
+		double eventTime = time + (destino.arrivalMax-destino.arrivalMin) * randomNumber + destino.arrivalMin;
+		schedule.offer(ScheduleEntry.newArrival(eventTime, destino));
 	}
 	
 	private int scheduleDeparture(PriorityQueue<ScheduleEntry> schedule, QueueStructure origin, double time, RNG rng) {
 		//Define event time
 		double randomNumber = rng.next();
-		int randomsUsed = 1;
+		int aletsUsed = 1;
 		double eventTime = time + (origin.serviceMax-origin.serviceMin) * randomNumber + origin.serviceMin;
 		
 		QueueStructure dest = null;
-		/* If more than one possible destination, roll the probabilities.
+		/* If more than one possible destino, roll the probabilities.
 		 * This consumes an extra random number. */
-		if(origin.destinations.size()>1) {
+		if(origin.destinos.size()>1) {
 			double randomProb = rng.next();
-			randomsUsed++;
+			aletsUsed++;
 			double prob = 0;
 			/* Probability check works like this:
 			 * Add p1 to prob. Check if random is lower. If not, add p2 to prob and check again.
 			 * If not, add p3 and check again and so on. If at any check the random is lower,
-			 * the corresponding destination is chosen.*/
-			for(int i = 0; i<origin.destinationProbs.size(); i++) {
-				prob += origin.destinationProbs.get(i);
+			 * the corresponding destino is chosen.*/
+			for(int i = 0; i<origin.probabilidadeDestino.size(); i++) {
+				prob += origin.probabilidadeDestino.get(i);
 				if(randomProb < prob) {
-					dest = origin.destinations.get(i);
+					dest = origin.destinos.get(i);
 					break;
 				}
 			}
 		
-		// Else there's only one possible destination
+		// Else there's only one possible destino
 		} else {
-			dest = origin.destinations.get(0);
+			dest = origin.destinos.get(0);
 		}
 		
 		//Generate schedule events accordingly
@@ -183,7 +182,7 @@ public class QueueSim {
 			schedule.offer(ScheduleEntry.newPassage(eventTime, origin, dest));
 		}
 		
-		return randomsUsed;
+		return aletsUsed;
 	}
 	
 	
@@ -195,12 +194,12 @@ public class QueueSim {
 	// File parsing methods
     //===========================================================
 	
-	private void parseFile(String fileString) throws Exception {
+	private void parseFile(String nomeArquivo) throws Exception {
 		try {
-			qs = new ArrayList<>();
+			estruturaFila = new ArrayList<>();
 			seeds = new ArrayList<>();
-			firstArrivals = new ArrayList<>();
-			String data = new String(Files.readAllBytes(Paths.get(fileString)));
+			primChegada = new ArrayList<>();
+			String data = new String(Files.readAllBytes(Paths.get(nomeArquivo)));
 			String[] lines = data.split("(\r\n)|\n");
 			for(int i=0; i<lines.length; i++) {
 				try {
@@ -209,23 +208,23 @@ public class QueueSim {
 						continue;
 						
 					} else if(s.charAt(0)=='q') { //Line defines a queue
-						qs.add(createQueue(s));
+						estruturaFila.add(createQueue(s));
 						
-					} else if(s.charAt(0)=='d'){ //Line defines a destination
+					} else if(s.charAt(0)=='d'){ //Line defines a destino
 						int beginning = s.indexOf(':');
-						defineDestination(qs, s.substring(beginning+1));
+						definedestino(estruturaFila, s.substring(beginning+1));
 						
 					} else if(s.charAt(0)=='s') { //Line defines seeds for the rng
 						int beginning = s.indexOf(':');
 						defineSeeds(s.substring(beginning+1));
 					
-					} else if(s.charAt(0)=='r') { //Line defines the amount of randoms to be used
+					} else if(s.charAt(0)=='r') { //Line defines the amount of alets to be used
 						int beginning = s.indexOf(':');
-						randoms = Integer.parseInt(s.substring(beginning+1).trim());
+						alets = Integer.parseInt(s.substring(beginning+1).trim());
 						
 					} else if(s.charAt(0)=='f') { //Line defines the first arrivals for the queues
 						int beginning = s.indexOf(':');
-						defineFirstArrivals(s.substring(beginning+1));
+						defineprimChegada(s.substring(beginning+1));
 						
 					} else { //Sintax error
 						throw new Exception(
@@ -237,7 +236,7 @@ public class QueueSim {
 				}
 			}
 			
-			if(firstArrivals.isEmpty()) {
+			if(primChegada.isEmpty()) {
 				throw new Exception("No first arrivals were defined for any queue in the system.");
 			}
 		} catch(IOException e) {
@@ -264,33 +263,33 @@ public class QueueSim {
 					Double.parseDouble(params[3]), //arrivalMax
 					Double.parseDouble(params[4]), //serviceMin					
 					Double.parseDouble(params[5]), //serviceMax
-					null); //destinations
+					null); //destinos
 	}
 	
-	private void defineDestination(ArrayList<QueueStructure> qs, String s) throws Exception {
-		String[] connectedQs = s.split("(->)");
+	private void definedestino(ArrayList<QueueStructure> estruturaFila, String s) throws Exception {
+		String[] connectedestruturaFila = s.split("(->)");
 		
-		//Defines the origin queue whose destinations are being parsed
-		String originName = connectedQs[0].trim();
-		QueueStructure origin = findQueue(qs, originName);
+		//Defines the origin queue whose destinos are being parsed
+		String originName = connectedestruturaFila[0].trim();
+		QueueStructure origin = findQueue(estruturaFila, originName);
 		
-		//Parse destinations
-		String[] destinations = connectedQs[1].split(",");
-		//Add each destination with it's corresponding routing probability to the origin object
-		for(String d : destinations) {
+		//Parse destinos
+		String[] destinos = connectedestruturaFila[1].split(",");
+		//Add each destino with it's corresponding routing probability to the origin object
+		for(String d : destinos) {
 			QueueStructure dest = null;
 			String[] destAndProb = d.split("/");
 			String destName = destAndProb[0].trim();
-			if(destName.equals("S") || destName.equals("s")) { //Destination is the system exit
+			if(destName.equals("S") || destName.equals("s")) { //destino is the system exit
 				dest = QueueStructure.EXIT;
-			} else { //Destination is one of the system's queues
-				dest = findQueue(qs, destName);
+			} else { //destino is one of the system's queues
+				dest = findQueue(estruturaFila, destName);
 			}
-			origin.destinations.add(dest);
-			origin.destinationProbs.add(Double.parseDouble(destAndProb[1]));
+			origin.destinos.add(dest);
+			origin.probabilidadeDestino.add(Double.parseDouble(destAndProb[1]));
 		}
 		double sum = 0.0;
-		for(double p : origin.destinationProbs) {
+		for(double p : origin.probabilidadeDestino) {
 			sum += p;
 		}
 		if(sum != 1.0) {
@@ -298,8 +297,8 @@ public class QueueSim {
 		}
 	}
 	
-	private QueueStructure findQueue(ArrayList<QueueStructure> qs, String name) throws Exception{
-		for(QueueStructure q : qs) {
+	private QueueStructure findQueue(ArrayList<QueueStructure> estruturaFila, String name) throws Exception{
+		for(QueueStructure q : estruturaFila) {
 			if(q.id.equals(name)) return q;
 		}
 		throw new Exception(String.format(
@@ -314,12 +313,12 @@ public class QueueSim {
 		}
 	}
 	
-	private void defineFirstArrivals(String str) throws Exception{
+	private void defineprimChegada(String str) throws Exception{
 		for(String s1 : str.replaceAll("\\s", "").split(",")) {
 			String[] queueAndArr = s1.split("/");
 			double time = Double.parseDouble(queueAndArr[1]);
-			QueueStructure q = findQueue(qs, queueAndArr[0]);
-			firstArrivals.add(ScheduleEntry.newArrival(time, q));
+			QueueStructure q = findQueue(estruturaFila, queueAndArr[0]);
+			primChegada.add(ScheduleEntry.newArrival(time, q));
 		}
 	}
 }
