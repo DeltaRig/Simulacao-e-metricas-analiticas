@@ -8,14 +8,14 @@ public class QueueStructure {
 	
 	
 	public String id;
-    public int servers;
-    public int capacity;
+    public int servico;
+    public int capacidade;
     
     //Time intervals for events
-    public double arrivalMin;
-    public double arrivalMax;
-    public double serviceMin;
-    public double serviceMax;
+    public double minChegada;
+    public double maxChegada;
+    public double minServico;
+    public double maxServico;
     
     // A queue may have one or more destinos for departure
     public ArrayList<QueueStructure> destinos;
@@ -25,24 +25,24 @@ public class QueueStructure {
     //------------------------------------------------------------
     // Simulation state variables
     //------------------------------------------------------------
-    /* Because the capacity of the queue can be infinite, the list containing
+    /* Because the capacidade of the queue can be infinite, the list containing
      * the time spent on each state cannot be defined before runtime. It might grow
      * with each client arrival. Therefore I've decided to keep currentQueueSize private
      * and provide methods to modify it.*/
     private int currentQueueSize;
     // List that keeps track of the amount of time the queue spent in each given state:
     public ArrayList<Double> temposDeEstado;
-    public int clientsLost;
+    public int perda;
     
-	public QueueStructure(String id, int servers, int capacity, double arrivalMin, double arrivalMax, double serviceMin,
-			double serviceMax, ArrayList<QueueStructure> destinos) {
+	public QueueStructure(String id, int servico, int capacidade, double minChegada, double maxChegada, double minServico,
+			double maxServico, ArrayList<QueueStructure> destinos) {
 		this.id = id;
-		this.servers = servers;
-		this.capacity = capacity;
-		this.arrivalMin = arrivalMin;
-		this.arrivalMax = arrivalMax;
-		this.serviceMin = serviceMin;
-		this.serviceMax = serviceMax;
+		this.servico = servico;
+		this.capacidade = capacidade;
+		this.minChegada = minChegada;
+		this.maxChegada = maxChegada;
+		this.minServico = minServico;
+		this.maxServico = maxServico;
 		if(destinos==null) {
 			this.destinos = new ArrayList<>();
 		} else {
@@ -53,20 +53,20 @@ public class QueueStructure {
 	}
 	
 	public boolean isFull() {
-		return currentQueueSize>=capacity;
+		return currentQueueSize>=capacidade;
 	}
 	
 	public boolean canServeOnArrival() {
-		return currentQueueSize <= servers;
+		return currentQueueSize <= servico;
 	}
 	
 	public boolean canServeOnDeparture() {
-		return currentQueueSize >= servers;
+		return currentQueueSize >= servico;
 	}
 	
 	/* If client can enter the queue: increments currentQueueSize, adds another state to stateTime if necessary
 	 * and returns true.
-	 * Otherwise: increments clientsLost and returns false. */
+	 * Otherwise: increments perda and returns false. */
 	public void addClient() {
 		currentQueueSize++;
 		/* If this is the first time the queue has entered this state, add the
@@ -88,13 +88,13 @@ public class QueueStructure {
 		currentQueueSize = 0;
 		temposDeEstado = new ArrayList<>();
 		temposDeEstado.add(0.0); //Add time for the beginning state 0.
-		clientsLost = 0;
+		perda = 0;
 	}
 	
 	public String toString() {
 		return String.format(
-				"Servers:%d\nCapacity:%d\nArrivals:%.1f to %.1f\nService:%.1f to %.1f\nTransfers clients to another queue:%b\n",
-				servers, capacity, arrivalMin, arrivalMax, serviceMin, serviceMax, (destinos!=null));
+				"servico:%d\ncapacidade:%d\nArrivals:%.1f to %.1f\nService:%.1f to %.1f\nTransfers clients to another queue:%b\n",
+				servico, capacidade, minChegada, maxChegada, minServico, maxServico, (destinos!=null));
 	}
 	
 	

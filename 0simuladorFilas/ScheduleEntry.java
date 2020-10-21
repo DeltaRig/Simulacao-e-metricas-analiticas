@@ -4,16 +4,16 @@ import java.util.Comparator;
 public class ScheduleEntry implements Comparator<ScheduleEntry> {
     
 	EventEnum event;
-    double time;
+    double tempo;
     QueueStructure origin;
 	QueueStructure destino;
 	
 	/* Arrivals require destino != null
 	 * Departures require origin != null
 	 * Passages require both origin and destino != null */
-	public ScheduleEntry(EventEnum event, double time, QueueStructure origin, QueueStructure destino) {
+	public ScheduleEntry(EventEnum event, double tempo, QueueStructure origin, QueueStructure destino) {
 		this.event = event;
-		this.time = time;
+		this.tempo = tempo;
 		this.origin = origin;
 		this.destino = destino;
 	}
@@ -22,26 +22,26 @@ public class ScheduleEntry implements Comparator<ScheduleEntry> {
 		
 	}
 	
-	public static ScheduleEntry newArrival(double time, QueueStructure destino) {
-		return new ScheduleEntry(EventEnum.ARRIVAL, time, null, destino);
+	public static ScheduleEntry newArrival(double tempo, QueueStructure destino) {
+		return new ScheduleEntry(EventEnum.ARRIVAL, tempo, null, destino);
 	}
-	public static ScheduleEntry newDeparture(double time, QueueStructure origin) {
-		return new ScheduleEntry(EventEnum.DEPARTURE, time, origin, QueueStructure.EXIT);
+	public static ScheduleEntry newDeparture(double tempo, QueueStructure origin) {
+		return new ScheduleEntry(EventEnum.DEPARTURE, tempo, origin, QueueStructure.EXIT);
 	}
-	public static ScheduleEntry newPassage(double time, QueueStructure origin, QueueStructure destino) {
-		return new ScheduleEntry(EventEnum.PASSAGE, time, origin, destino);
+	public static ScheduleEntry newPassage(double tempo, QueueStructure origin, QueueStructure destino) {
+		return new ScheduleEntry(EventEnum.PASSAGE, tempo, origin, destino);
 	}
 	
 	public int compare(ScheduleEntry se1, ScheduleEntry se2) {
-        if(se1.time < se2.time)
+        if(se1.tempo < se2.tempo)
             return -1;
-        if(se1.time > se2.time)
+        if(se1.tempo > se2.tempo)
             return 1;
         return 0;
     }
 	
 	public ScheduleEntry clone() {
-		return new ScheduleEntry(event, time, origin, destino);
+		return new ScheduleEntry(event, tempo, origin, destino);
 	}
 }
 //===========================================================
