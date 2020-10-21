@@ -1,11 +1,11 @@
-public class RNG {
+public class GeradorNumerosAleatorios {
     private long a;
     private long c;
     private long m;
     private long x;
 
 
-    public RNG(long semente) {
+    public GeradorNumerosAleatorios(long semente) {
         a = Long.parseUnsignedLong("3089823433");
         c = 11L;
         m = Integer.MAX_VALUE;

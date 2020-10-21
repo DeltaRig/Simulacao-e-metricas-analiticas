@@ -5,16 +5,16 @@ public class Escalonador implements Comparator<Escalonador> {
     
 	TipoEvento evento;
     double tempo;
-    QueueStructure origin;
+    QueueStructure origem;
 	QueueStructure destino;
 	
 	/* Arrivals require destino != null
-	 * Departures require origin != null
-	 * Passages require both origin and destino != null */
-	public Escalonador(TipoEvento evento, double tempo, QueueStructure origin, QueueStructure destino) {
+	 * Departures require origem != null
+	 * Passages require both origem and destino != null */
+	public Escalonador(TipoEvento evento, double tempo, QueueStructure origem, QueueStructure destino) {
 		this.evento = evento;
 		this.tempo = tempo;
-		this.origin = origin;
+		this.origem = origem;
 		this.destino = destino;
 	}
 	
@@ -23,11 +23,11 @@ public class Escalonador implements Comparator<Escalonador> {
 	public static Escalonador newArrival(double tempo, QueueStructure destino) {
 		return new Escalonador(TipoEvento.CHEGADA, tempo, null, destino);
 	}
-	public static Escalonador newDeparture(double tempo, QueueStructure origin) {
-		return new Escalonador(TipoEvento.SAIDA, tempo, origin, QueueStructure.FIM);
+	public static Escalonador newDeparture(double tempo, QueueStructure origem) {
+		return new Escalonador(TipoEvento.SAIDA, tempo, origem, QueueStructure.FIM);
 	}
-	public static Escalonador newPassage(double tempo, QueueStructure origin, QueueStructure destino) {
-		return new Escalonador(TipoEvento.PASSAGEM, tempo, origin, destino);
+	public static Escalonador newPassage(double tempo, QueueStructure origem, QueueStructure destino) {
+		return new Escalonador(TipoEvento.PASSAGEM, tempo, origem, destino);
 	}
 	
 	public int compare(Escalonador se1, Escalonador se2) {
@@ -39,6 +39,6 @@ public class Escalonador implements Comparator<Escalonador> {
     }
 	
 	public Escalonador clone() {
-		return new Escalonador(evento, tempo, origin, destino);
+		return new Escalonador(evento, tempo, origem, destino);
 	}
 }

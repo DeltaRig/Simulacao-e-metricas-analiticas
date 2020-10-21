@@ -63,7 +63,7 @@ public class QueueSim {
         	schedule.offer(se);
         }
                
-        RNG rng = new RNG(aletseed);
+        GeradorNumerosAleatorios rng = new GeradorNumerosAleatorios(aletseed);
         double tempo = 0;
         
         while(totalalets > 0) {
@@ -93,7 +93,7 @@ public class QueueSim {
             
             
             } else if(se.evento == TipoEvento.PASSAGEM) {
-            	QueueStructure ori = se.origin;
+            	QueueStructure ori = se.origem;
             	QueueStructure dest = se.destino;
             	ori.removeClient();
                 if(ori.canServeOnDeparture()) { //Origin can serve another client.
@@ -111,7 +111,7 @@ public class QueueSim {
             
                 
             } else { //It's a departure
-            	QueueStructure ori = se.origin;
+            	QueueStructure ori = se.origem;
             	ori.removeClient();
             	if(ori.canServeOnDeparture()) { //Can serve one more client
             		totalalets -= scheduleDeparture(schedule, ori, tempo, rng);
@@ -139,13 +139,13 @@ public class QueueSim {
         return sr;
 	}
 	
-	private void scheduleArrival(PriorityQueue<Escalonador> escalonador, QueueStructure destino, double time, RNG rng) {
+	private void scheduleArrival(PriorityQueue<Escalonador> escalonador, QueueStructure destino, double time, GeradorNumerosAleatorios rng) {
 		double randomNumber = rng.next();
 		double eventoTime = time + (destino.maxChegada - destino.minChegada) * randomNumber + destino.minChegada;
 		escalonador.offer(Escalonador.newArrival(eventoTime, destino));
 	}
 	
-	private int scheduleDeparture(PriorityQueue<Escalonador> escalonador, QueueStructure origin, double time, RNG rng) {
+	private int scheduleDeparture(PriorityQueue<Escalonador> escalonador, QueueStructure origin, double time, GeradorNumerosAleatorios rng) {
 		//Define evento time
 		double randomNumber = rng.next();
 		int aletsUsado = 1;
