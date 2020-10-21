@@ -23,7 +23,7 @@ public class QueueSim {
     
     /* Constructs object from file. */
     public QueueSim(String nomeArquivo) throws Exception {
-    	parseFile(nomeArquivo);
+    	recebeArquivo(nomeArquivo);
     }
     
 	public void runSimulation() {
@@ -190,11 +190,8 @@ public class QueueSim {
 	
 	
 	
-	//===========================================================
-	// File parsing methods
-    //===========================================================
-	
-	private void parseFile(String nomeArquivo) throws Exception {
+	//Receber e identificar dados do arquivo
+	private void recebeArquivo(String nomeArquivo) throws Exception {
 		try {
 			estruturaFila = new ArrayList<>();
 			seeds = new ArrayList<>();
@@ -248,21 +245,21 @@ public class QueueSim {
 	private QueueStructure createQueue(String s) throws Exception {
 		
 			String[] splitOnColon = s.replaceAll("\\s", "").split(":");
-			String[] params = splitOnColon[1].split("/");
+			String[] parametros = splitOnColon[1].split("/");
 			int capacidade;
-			if(params[1].equals("inf")) {
+			if(parametros[1].equals("inf")) {
 				capacidade = Integer.MAX_VALUE;
 			} else {
-				capacidade = Integer.parseInt(params[1]);
+				capacidade = Integer.parseInt(parametros[1]);
 			}
 			return new QueueStructure(
 					splitOnColon[0], //id
-					Integer.parseInt(params[0]), //servers
+					Integer.parseInt(parametros[0]), //servers
 					capacidade,
-					Double.parseDouble(params[2]), //minChegada
-					Double.parseDouble(params[3]), //maxChegada
-					Double.parseDouble(params[4]), //minServico					
-					Double.parseDouble(params[5]), //maxServico
+					Double.parseDouble(parametros[2]), //minChegada
+					Double.parseDouble(parametros[3]), //maxChegada
+					Double.parseDouble(parametros[4]), //minServico					
+					Double.parseDouble(parametros[5]), //maxServico
 					null); //destinos
 	}
 	
@@ -271,7 +268,7 @@ public class QueueSim {
 		
 		//Defines the origin queue whose destinos are being parsed
 		String nomeOrigem = estruturaFilaConect[0].trim();
-		QueueStructure origin = findQueue(estruturaFila, nomeOrigem);
+		QueueStructure origem = findQueue(estruturaFila, nomeOrigem);
 		
 		//Parse destinos
 		String[] destinos = estruturaFilaConect[1].split(",");
@@ -285,14 +282,14 @@ public class QueueSim {
 			} else { //destino is one of the system's queues
 				dest = findQueue(estruturaFila, destName);
 			}
-			origin.destinos.add(dest);
-			origin.probabilidadeDestino.add(Double.parseDouble(destAndProb[1]));
+			origem.destinos.add(dest);
+			origem.probabilidadeDestino.add(Double.parseDouble(destAndProb[1]));
 		}
-		double sum = 0.0;
-		for(double p : origin.probabilidadeDestino) {
-			sum += p;
+		double soma = 0.0;
+		for(double p : origem.probabilidadeDestino) {
+			soma += p;
 		}
-		if(sum != 1.0) {
+		if(soma != 1.0) {
 			throw new Exception("The sum of all routing probabilities in a queue must equal 1.");
 		}
 	}
@@ -314,11 +311,11 @@ public class QueueSim {
 	}
 	
 	private void defineprimChegada(String str) throws Exception{
-		for(String s1 : str.replaceAll("\\s", "").split(",")) {
-			String[] queueAndArr = s1.split("/");
-			double time = Double.parseDouble(queueAndArr[1]);
-			QueueStructure q = findQueue(estruturaFila, queueAndArr[0]);
-			primChegada.add(ScheduleEntry.newArrival(time, q));
+		for(String s : str.replaceAll("\\s", "").split(",")) {
+			String[] filaArr = s.split("/");
+			double tempo = Double.parseDouble(filaArr[1]);
+			QueueStructure q = findQueue(estruturaFila, filaArr[0]);
+			primChegada.add(ScheduleEntry.newArrival(tempo, q));
 		}
 	}
 }

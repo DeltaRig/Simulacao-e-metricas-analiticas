@@ -4,15 +4,15 @@ public class RNG {
     private long m;
     private long x;
 
-    // Parameters based on java implementation according to wikipedia.
-    public RNG(long seed) {
-        a = Long.parseUnsignedLong("25214903917");
+
+    public RNG(long semente) {
+        a = Long.parseUnsignedLong("3089823433");
         c = 11L;
-        m = 1L << 48;
-        x = seed;
+        m = Integer.MAX_VALUE;
+        x = semente;
     }
     
-  
+    //correção feita (usar um método next)
     public double next() {
         x = Long.remainderUnsigned(a*x+c , m);
         double resposta = x/(double)m;
