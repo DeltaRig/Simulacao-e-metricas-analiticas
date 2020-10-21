@@ -20,9 +20,9 @@ O arquivo "filas" está comentado e ensina como funciona a sintaxe para definir 
 
 A principal classe de simulação é a QueueSim, contendo quase toda a lógica de simulação.
 
-Objetos da classe QueueStructure guardam a especificação de uma fila.
+Objetos da classe Fila guardam a especificação de uma fila.
 
-A classe ScheduleEntry é usada pelo simulador para representar eventos escalonados.
+A classe Escalonador é usada pelo simulador para representar eventos escalonados.
 
 A classe SimulationReport é usada pelo simulador para guardar os resultados de uma simulação.
 
@@ -31,8 +31,11 @@ RNG é a classe do gerador de números aleatórios.
 ### Classes:
 - App: Verifica se foi informado um arquivo e encaminho para o simulador.
 - QueueSim: >> Simulador
-- QueueStructure: Armazena todas os dados da fila. >> Fila
+- Fila: Armazena todas os dados da fila.
 - GeradorNumerosAleatorios: Gera números aleátorios ou utilizar valores pré definidos para as operações.
 - Escalonador: Gerencia os eventos do simulador, armazenando se o informando se são de saída ou chegada (o que é definido no momento de seu agendamento) e o momento em que deve ocorrer. Além de informar de onde para onde a pessoa vai.
-- SimulationReport: 
+- SimulationReport: >> Resultados
 - TipoEvento: Enum com os tipos de evento.
+
+### Referências:
+- https://aaronschlegel.me/linear-congruential-generator-r.html

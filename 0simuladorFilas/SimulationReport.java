@@ -3,78 +3,78 @@ import java.util.ArrayList;
 /* Records results of one simulation. These results can be combined into average results. */
 class SimulationReport {
     
-	String[] queueIDs;
-	double totalSimulationTime;
+	String[] idFila;
+	double tempoTotalSimulacao;
     /* This list holds, for each queue in the simulation, a list of
      * the times it spent on each of it's respective states. */
-    ArrayList<ArrayList<Double>> stateTimes;
+    ArrayList<ArrayList<Double>> temposDeEstado;
     
     //Used a double for cases where the report is an average of different results:
-    double[] clientsLost;
+    double[] perda;
                        
-    public SimulationReport(String[] queueIDs, double t, ArrayList<ArrayList<Double>> st, double[] cl) {
-        this.queueIDs = queueIDs;
-    	totalSimulationTime = t;
-        stateTimes = st;
-        clientsLost = cl;
+    public SimulationReport(String[] idFila, double t, ArrayList<ArrayList<Double>> st, double[] cl) {
+        this.idFila = idFila;
+    	tempoTotalSimulacao = t;
+        temposDeEstado = st;
+        perda = cl;
     }
     
     public String toString() {
         StringBuilder res = new StringBuilder(500);
-        for(int i=0; i<stateTimes.size(); i++) {
-        	ArrayList<Double> qTimes = stateTimes.get(i);
-            res.append("Queue "+queueIDs[i]+":\n");
-        	for(int j=0; j<qTimes.size(); j++) {
+        for(int i = 0; i < temposDeEstado.size(); i++) {
+        	ArrayList<Double> temposFila = temposDeEstado.get(i);
+            res.append("Fila " + idFila[i]+":\n");
+        	for(int j=0; j<temposFila.size(); j++) {
         		res.append(String.format(
-                           "State: %d  time: %.2f  probability: %.2f%%\n",
-                           j, qTimes.get(j), 100*qTimes.get(j)/totalSimulationTime));
+                           "Estado: %d  Tempo: %.2f  Probabilidade: %.2f%%\n",
+                           j, temposFila.get(j), 100*temposFila.get(j)/tempoTotalSimulacao));
         	}
-        	res.append(String.format("Clients Lost: %.2f\n---------------------------\n", clientsLost[i]));
+        	res.append(String.format("Perda: %.2f\n---------------------------\n", perda[i]));
         }
         
-        res.append(String.format("Total simulation time: %.2f", totalSimulationTime));
+        res.append(String.format("Tempo total de simulação: %.2f", tempoTotalSimulacao));
         return res.toString();
     }
     
     /* Sums the results of the second report on the first report. */
     public void sumSimulation(SimulationReport r) {
-    	totalSimulationTime += r.totalSimulationTime;
+    	tempoTotalSimulacao += r.tempoTotalSimulacao;
     	
     	// For each queue simulated...
-    	for(int i=0; i<stateTimes.size(); i++) {
+    	for(int i=0; i<temposDeEstado.size(); i++) {
     		// sum the number of clients lost
-    		clientsLost[i] += r.clientsLost[i];
+    		perda[i] += r.perda[i];
     		
     		/* and for each state of that queue, sum the time spent in both simulations.
     		 * Since queues can have infinite capacity, states may differ.
     		 * This must taken into account: */
-    		ArrayList<Double> qTimes1 = stateTimes.get(i);
-    		ArrayList<Double> qTimes2 = r.stateTimes.get(i);
-    		matchArraySizes(qTimes1, qTimes2); //Make list sizes equal
-    		for(int j=0; j<qTimes1.size(); j++) {
-    			qTimes1.set(j, qTimes1.get(j) + qTimes2.get(j));
+    		ArrayList<Double> temposFila1 = temposDeEstado.get(i);
+    		ArrayList<Double> temposFila2 = r.temposDeEstado.get(i);
+    		comparadorArrays(temposFila1, temposFila2); //Make list sizes equal
+    		for(int j=0; j<temposFila1.size(); j++) {
+    			temposFila1.set(j, temposFila1.get(j) + temposFila2.get(j));
     		}
     	}
     }
     
     /* Divides the fields of the report by n. */
     public void averageResults(int n) {
-    	totalSimulationTime /= n;
-    	for(int i=0; i<stateTimes.size(); i++) {
-    		clientsLost[i] /= n;
-    		ArrayList<Double> stateTime = stateTimes.get(i);
-    		for(int j=0; j<stateTime.size(); j++) {
-    			stateTime.set(j, stateTime.get(j)/n);
+    	tempoTotalSimulacao /= n;
+    	for(int i=0; i < temposDeEstado.size(); i++) {
+    		perda[i] /= n;
+    		ArrayList<Double> tempoDeEstado = temposDeEstado.get(i);
+    		for(int j = 0; j < tempoDeEstado.size(); j++) {
+    			tempoDeEstado.set(j, tempoDeEstado.get(j) / n);
     		}
     	}
     }
     
     /* Equalizes the size of two arrays by filling the smaller array with zeroes. */
-    private void matchArraySizes(ArrayList<Double> arr1, ArrayList<Double> arr2) {
-    	while(arr1.size()<arr2.size())
-			arr1.add(0.0);
-    	while(arr2.size()<arr1.size())
-			arr2.add(0.0);
+    private void comparadorArrays(ArrayList<Double> arr, ArrayList<Double> outroArr) {
+    	while(arr.size()<outroArr.size())
+			arr.add(0.0);
+    	while(outroArr.size()<arr.size())
+			outroArr.add(0.0);
     	
     }
 }

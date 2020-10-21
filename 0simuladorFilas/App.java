@@ -9,7 +9,7 @@ public class App {
 			nomeArquivo = "filas";
 		}
 		
-		QueueSim simulador = new QueueSim(nomeArquivo);
+		Simulador simulador = new Simulador(nomeArquivo);
 		simulador.runSimulation();
 		
 	}

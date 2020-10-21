@@ -6,23 +6,23 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 
-public class QueueSim {
+public class Simulador {
 	
 	
     private ArrayList<Fila> estruturaFila;
-    private ArrayList<Long> seeds;
+    private ArrayList<Long> sementes;
     private int alets;
     private ArrayList<Escalonador> primChegada;
 	
-    public QueueSim(ArrayList<Fila> estruturaFila, ArrayList<Long> seeds, int alets, ArrayList<Escalonador> primChegada) {
+    public Simulador(ArrayList<Fila> estruturaFila, ArrayList<Long> sementes, int alets, ArrayList<Escalonador> primChegada) {
     	this.estruturaFila = estruturaFila;
-    	this.seeds = seeds;
+    	this.sementes = sementes;
     	this.alets = alets;
     	this.primChegada = primChegada;
     }
     
     /* Constructs object from file. */
-    public QueueSim(String nomeArquivo) throws Exception {
+    public Simulador(String nomeArquivo) throws Exception {
     	recebeArquivo(nomeArquivo);
     }
     
@@ -42,14 +42,14 @@ public class QueueSim {
 		SimulationReport res = new SimulationReport(idsFila, 0.0, temposDeEstado, new double[estruturaFila.size()]);
 		
 		
-		for(long r : seeds) {
+		for(long r : sementes) {
 			SimulationReport tempo = runSimulation(r, alets);
 			res.sumSimulation(tempo);
 		}
 		/* Divide the accumulated results by the number of simulations run to obtain
 		 * the average of the results. */
-		res.averageResults(seeds.size());
-		System.out.printf("Printing average results of %d simulations:\n", seeds.size());
+		res.averageResults(sementes.size());
+		System.out.printf("Printing average results of %d simulations:\n", sementes.size());
 		System.out.println(res.toString());
 	}
 	
@@ -194,7 +194,7 @@ public class QueueSim {
 	private void recebeArquivo(String nomeArquivo) throws Exception {
 		try {
 			estruturaFila = new ArrayList<>();
-			seeds = new ArrayList<>();
+			sementes = new ArrayList<>();
 			primChegada = new ArrayList<>();
 			String data = new String(Files.readAllBytes(Paths.get(nomeArquivo)));
 			String[] lines = data.split("(\r\n)|\n");
@@ -211,9 +211,9 @@ public class QueueSim {
 						int chegada = s.indexOf(':');
 						defineDestino(estruturaFila, s.substring(chegada+1));
 						
-					} else if(s.charAt(0)=='s') { //Line defines seeds for the rng
+					} else if(s.charAt(0)=='s') { //Line defines sementes for the rng
 						int chegada = s.indexOf(':');
-						defineSeeds(s.substring(chegada+1));
+						defineSementes(s.substring(chegada+1));
 					
 					} else if(s.charAt(0)=='r') { //Line defines the amount of alets to be used
 						int chegada = s.indexOf(':');
@@ -303,10 +303,10 @@ public class QueueSim {
 		
 	}
 	
-	private void defineSeeds(String str) {
+	private void defineSementes(String str) {
 		String[] longsString = str.replaceAll("\\s", "").split(",");
 		for(String s : longsString) {
-			seeds.add(Long.parseLong(s));
+			sementes.add(Long.parseLong(s));
 		}
 	}
 	
@@ -314,8 +314,8 @@ public class QueueSim {
 		for(String s : str.replaceAll("\\s", "").split(",")) {
 			String[] filaArr = s.split("/");
 			double tempo = Double.parseDouble(filaArr[1]);
-			Fila q = findQueue(estruturaFila, filaArr[0]);
-			primChegada.add(Escalonador.newArrival(tempo, q));
+			Fila f = findQueue(estruturaFila, filaArr[0]);
+			primChegada.add(Escalonador.newArrival(tempo, f));
 		}
 	}
 }
