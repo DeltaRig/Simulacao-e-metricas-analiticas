@@ -12,9 +12,9 @@ public class QueueSim {
     private ArrayList<QueueStructure> estruturaFila;
     private ArrayList<Long> seeds;
     private int alets;
-    private ArrayList<ScheduleEntry> primChegada;
+    private ArrayList<Escalonador> primChegada;
 	
-    public QueueSim(ArrayList<QueueStructure> estruturaFila, ArrayList<Long> seeds, int alets, ArrayList<ScheduleEntry> primChegada) {
+    public QueueSim(ArrayList<QueueStructure> estruturaFila, ArrayList<Long> seeds, int alets, ArrayList<Escalonador> primChegada) {
     	this.estruturaFila = estruturaFila;
     	this.seeds = seeds;
     	this.alets = alets;
@@ -56,10 +56,10 @@ public class QueueSim {
 	private SimulationReport runSimulation(long aletseed, int totalalets) {
 		
 		//evento schedule
-		Comparator<ScheduleEntry> schComparator = new ScheduleEntry();
-		PriorityQueue<ScheduleEntry> schedule = new PriorityQueue<>(schComparator);
+		Comparator<Escalonador> schComparator = new Escalonador();
+		PriorityQueue<Escalonador> schedule = new PriorityQueue<>(schComparator);
 		//First arrivals are offered to the schedule
-        for(ScheduleEntry se : primChegada) {
+        for(Escalonador se : primChegada) {
         	schedule.offer(se);
         }
                
@@ -69,7 +69,7 @@ public class QueueSim {
         while(totalalets > 0) {
             
             //Process next scheduled evento
-            ScheduleEntry se = schedule.poll();
+            Escalonador se = schedule.poll();
             double variacaoTempo = se.tempo - tempo;
             for(QueueStructure q : estruturaFila) {
             	q.updateQueueTimes(variacaoTempo);
@@ -139,13 +139,13 @@ public class QueueSim {
         return sr;
 	}
 	
-	private void scheduleArrival(PriorityQueue<ScheduleEntry> schedule, QueueStructure destino, double time, RNG rng) {
+	private void scheduleArrival(PriorityQueue<Escalonador> escalonador, QueueStructure destino, double time, RNG rng) {
 		double randomNumber = rng.next();
 		double eventoTime = time + (destino.maxChegada - destino.minChegada) * randomNumber + destino.minChegada;
-		schedule.offer(ScheduleEntry.newArrival(eventoTime, destino));
+		escalonador.offer(Escalonador.newArrival(eventoTime, destino));
 	}
 	
-	private int scheduleDeparture(PriorityQueue<ScheduleEntry> schedule, QueueStructure origin, double time, RNG rng) {
+	private int scheduleDeparture(PriorityQueue<Escalonador> escalonador, QueueStructure origin, double time, RNG rng) {
 		//Define evento time
 		double randomNumber = rng.next();
 		int aletsUsado = 1;
@@ -177,9 +177,9 @@ public class QueueSim {
 		
 		//Generate schedule eventos accordingly
 		if(dest == QueueStructure.FIM) {//Departure from the system
-			schedule.offer(ScheduleEntry.newDeparture(eventoTime, origin));
+			escalonador.offer(Escalonador.newDeparture(eventoTime, origin));
 		} else { //Passage from one queue to another
-			schedule.offer(ScheduleEntry.newPassage(eventoTime, origin, dest));
+			escalonador.offer(Escalonador.newPassage(eventoTime, origin, dest));
 		}
 		
 		return aletsUsado;
@@ -315,7 +315,7 @@ public class QueueSim {
 			String[] filaArr = s.split("/");
 			double tempo = Double.parseDouble(filaArr[1]);
 			QueueStructure q = findQueue(estruturaFila, filaArr[0]);
-			primChegada.add(ScheduleEntry.newArrival(tempo, q));
+			primChegada.add(Escalonador.newArrival(tempo, q));
 		}
 	}
 }

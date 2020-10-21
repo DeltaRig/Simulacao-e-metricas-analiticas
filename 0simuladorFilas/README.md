@@ -32,6 +32,7 @@ RNG é a classe do gerador de números aleatórios.
 - App: Verifica se foi informado um arquivo e encaminho para o simulador.
 - QueueSim:
 - QueueStructure: Armazena todas os dados da fila.
+- RNG >> GeradorNumerosAleatorios
 - ScheduleEntry: 
 - SimulationReport: 
 - TipoEvento: Enum com os tipos de evento.
