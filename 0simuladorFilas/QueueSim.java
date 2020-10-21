@@ -9,12 +9,12 @@ import java.nio.file.Paths;
 public class QueueSim {
 	
 	
-    private ArrayList<QueueStructure> estruturaFila;
+    private ArrayList<Fila> estruturaFila;
     private ArrayList<Long> seeds;
     private int alets;
     private ArrayList<Escalonador> primChegada;
 	
-    public QueueSim(ArrayList<QueueStructure> estruturaFila, ArrayList<Long> seeds, int alets, ArrayList<Escalonador> primChegada) {
+    public QueueSim(ArrayList<Fila> estruturaFila, ArrayList<Long> seeds, int alets, ArrayList<Escalonador> primChegada) {
     	this.estruturaFila = estruturaFila;
     	this.seeds = seeds;
     	this.alets = alets;
@@ -71,14 +71,14 @@ public class QueueSim {
             //Process next scheduled evento
             Escalonador se = schedule.poll();
             double variacaoTempo = se.tempo - tempo;
-            for(QueueStructure q : estruturaFila) {
+            for(Fila q : estruturaFila) {
             	q.updateQueueTimes(variacaoTempo);
             }
             tempo += variacaoTempo; //update simulation clock
             
             
             if(se.evento == TipoEvento.CHEGADA) {
-                QueueStructure dest = se.destino;
+                Fila dest = se.destino;
             	if(!dest.isFull()) { //Queue can receive the client
                     dest.addClient();
                     if(dest.canServeOnArrival()) { //Queue can serve the client
@@ -93,8 +93,8 @@ public class QueueSim {
             
             
             } else if(se.evento == TipoEvento.PASSAGEM) {
-            	QueueStructure ori = se.origem;
-            	QueueStructure dest = se.destino;
+            	Fila ori = se.origem;
+            	Fila dest = se.destino;
             	ori.removeClient();
                 if(ori.canServeOnDeparture()) { //Origin can serve another client.
                 	totalalets -= scheduleDeparture(schedule, ori, tempo, rng);
@@ -111,7 +111,7 @@ public class QueueSim {
             
                 
             } else { //It's a departure
-            	QueueStructure ori = se.origem;
+            	Fila ori = se.origem;
             	ori.removeClient();
             	if(ori.canServeOnDeparture()) { //Can serve one more client
             		totalalets -= scheduleDeparture(schedule, ori, tempo, rng);
@@ -132,26 +132,26 @@ public class QueueSim {
         SimulationReport sr = new SimulationReport(idsFila, tempo, tempoFilas, perda);
         
         //Reset the state of all queues.
-        for(QueueStructure q : estruturaFila) {
+        for(Fila q : estruturaFila) {
         	q.resetSimulationVariables();
         }
         
         return sr;
 	}
 	
-	private void scheduleArrival(PriorityQueue<Escalonador> escalonador, QueueStructure destino, double time, GeradorNumerosAleatorios rng) {
+	private void scheduleArrival(PriorityQueue<Escalonador> escalonador, Fila destino, double time, GeradorNumerosAleatorios rng) {
 		double randomNumber = rng.next();
 		double eventoTime = time + (destino.maxChegada - destino.minChegada) * randomNumber + destino.minChegada;
 		escalonador.offer(Escalonador.newArrival(eventoTime, destino));
 	}
 	
-	private int scheduleDeparture(PriorityQueue<Escalonador> escalonador, QueueStructure origin, double time, GeradorNumerosAleatorios rng) {
+	private int scheduleDeparture(PriorityQueue<Escalonador> escalonador, Fila origin, double time, GeradorNumerosAleatorios rng) {
 		//Define evento time
 		double randomNumber = rng.next();
 		int aletsUsado = 1;
 		double eventoTime = time + (origin.maxServico-origin.minServico) * randomNumber + origin.minServico;
 		
-		QueueStructure dest = null;
+		Fila dest = null;
 		/* If more than one possible destino, roll the probabilities.
 		 * This consumes an extra random number. */
 		if(origin.destinos.size()>1) {
@@ -176,7 +176,7 @@ public class QueueSim {
 		}
 		
 		//Generate schedule eventos accordingly
-		if(dest == QueueStructure.FIM) {//Departure from the system
+		if(dest == Fila.FIM) {//Departure from the system
 			escalonador.offer(Escalonador.newDeparture(eventoTime, origin));
 		} else { //Passage from one queue to another
 			escalonador.offer(Escalonador.newPassage(eventoTime, origin, dest));
@@ -242,7 +242,7 @@ public class QueueSim {
 		}
 	}
 	
-	private QueueStructure createQueue(String s) throws Exception {
+	private Fila createQueue(String s) throws Exception {
 		
 			String[] splitOnColon = s.replaceAll("\\s", "").split(":");
 			String[] parametros = splitOnColon[1].split("/");
@@ -252,7 +252,7 @@ public class QueueSim {
 			} else {
 				capacidade = Integer.parseInt(parametros[1]);
 			}
-			return new QueueStructure(
+			return new Fila(
 					splitOnColon[0], //id
 					Integer.parseInt(parametros[0]), //servers
 					capacidade,
@@ -263,22 +263,22 @@ public class QueueSim {
 					null); //destinos
 	}
 	
-	private void defineDestino(ArrayList<QueueStructure> estruturaFila, String s) throws Exception {
+	private void defineDestino(ArrayList<Fila> estruturaFila, String s) throws Exception {
 		String[] estruturaFilaConect = s.split("(->)");
 		
 		//Defines the origin queue whose destinos are being parsed
 		String nomeOrigem = estruturaFilaConect[0].trim();
-		QueueStructure origem = findQueue(estruturaFila, nomeOrigem);
+		Fila origem = findQueue(estruturaFila, nomeOrigem);
 		
 		//Parse destinos
 		String[] destinos = estruturaFilaConect[1].split(",");
 		//Add each destino with it's corresponding routing probability to the origin object
 		for(String d : destinos) {
-			QueueStructure dest = null;
+			Fila dest = null;
 			String[] destAndProb = d.split("/");
 			String destName = destAndProb[0].trim();
 			if(destName.equals("S") || destName.equals("s")) { //destino is the system exit
-				dest = QueueStructure.FIM;
+				dest = Fila.FIM;
 			} else { //destino is one of the system's queues
 				dest = findQueue(estruturaFila, destName);
 			}
@@ -294,8 +294,8 @@ public class QueueSim {
 		}
 	}
 	
-	private QueueStructure findQueue(ArrayList<QueueStructure> estruturaFila, String nome) throws Exception{
-		for(QueueStructure f : estruturaFila) {
+	private Fila findQueue(ArrayList<Fila> estruturaFila, String nome) throws Exception{
+		for(Fila f : estruturaFila) {
 			if(f.id.equals(nome)) return f;
 		}
 		throw new Exception(String.format(
@@ -314,7 +314,7 @@ public class QueueSim {
 		for(String s : str.replaceAll("\\s", "").split(",")) {
 			String[] filaArr = s.split("/");
 			double tempo = Double.parseDouble(filaArr[1]);
-			QueueStructure q = findQueue(estruturaFila, filaArr[0]);
+			Fila q = findQueue(estruturaFila, filaArr[0]);
 			primChegada.add(Escalonador.newArrival(tempo, q));
 		}
 	}

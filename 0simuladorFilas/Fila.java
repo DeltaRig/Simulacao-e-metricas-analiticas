@@ -1,10 +1,10 @@
 import java.util.ArrayList;
 
-public class QueueStructure {
+public class Fila {
 	
 	/* Static variable representing a destination from a queue to the outside of the system.
 	 * See destinos ArrayList below.*/
-	public static final QueueStructure FIM = new QueueStructure("FIM", -1,-1,-1,-1,-1,-1,null); 
+	public static final Fila FIM = new Fila("FIM", -1,-1,-1,-1,-1,-1,null); 
 	
 	
 	public String id;
@@ -18,7 +18,7 @@ public class QueueStructure {
     public double maxServico;
     
     // A queue may have one or more destinos for departure
-    public ArrayList<QueueStructure> destinos;
+    public ArrayList<Fila> destinos;
     // Each destination has it's corresponding routing probability
     public ArrayList<Double> probabilidadeDestino;
     
@@ -34,8 +34,8 @@ public class QueueStructure {
     public ArrayList<Double> temposDeEstado;
     public int perda;
     
-	public QueueStructure(String id, int servico, int capacidade, double minChegada, double maxChegada, double minServico,
-			double maxServico, ArrayList<QueueStructure> destinos) {
+	public Fila(String id, int servico, int capacidade, double minChegada, double maxChegada, double minServico,
+			double maxServico, ArrayList<Fila> destinos) {
 		this.id = id;
 		this.servico = servico;
 		this.capacidade = capacidade;
