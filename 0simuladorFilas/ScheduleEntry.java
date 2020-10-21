@@ -26,7 +26,7 @@ public class ScheduleEntry implements Comparator<ScheduleEntry> {
 		return new ScheduleEntry(TipoEvento.CHEGADA, tempo, null, destino);
 	}
 	public static ScheduleEntry newDeparture(double tempo, QueueStructure origin) {
-		return new ScheduleEntry(TipoEvento.SAIDA, tempo, origin, QueueStructure.EXIT);
+		return new ScheduleEntry(TipoEvento.SAIDA, tempo, origin, QueueStructure.FIM);
 	}
 	public static ScheduleEntry newPassage(double tempo, QueueStructure origin, QueueStructure destino) {
 		return new ScheduleEntry(TipoEvento.PASSAGEM, tempo, origin, destino);

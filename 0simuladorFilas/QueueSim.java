@@ -148,7 +148,7 @@ public class QueueSim {
 	private int scheduleDeparture(PriorityQueue<ScheduleEntry> schedule, QueueStructure origin, double time, RNG rng) {
 		//Define evento time
 		double randomNumber = rng.next();
-		int aletsUsed = 1;
+		int aletsUsado = 1;
 		double eventoTime = time + (origin.maxServico-origin.minServico) * randomNumber + origin.minServico;
 		
 		QueueStructure dest = null;
@@ -156,7 +156,7 @@ public class QueueSim {
 		 * This consumes an extra random number. */
 		if(origin.destinos.size()>1) {
 			double randomProb = rng.next();
-			aletsUsed++;
+			aletsUsado++;
 			double prob = 0;
 			/* Probability check works like this:
 			 * Add p1 to prob. Check if random is lower. If not, add p2 to prob and check again.
@@ -176,13 +176,13 @@ public class QueueSim {
 		}
 		
 		//Generate schedule eventos accordingly
-		if(dest == QueueStructure.EXIT) {//Departure from the system
+		if(dest == QueueStructure.FIM) {//Departure from the system
 			schedule.offer(ScheduleEntry.newDeparture(eventoTime, origin));
 		} else { //Passage from one queue to another
 			schedule.offer(ScheduleEntry.newPassage(eventoTime, origin, dest));
 		}
 		
-		return aletsUsed;
+		return aletsUsado;
 	}
 	
 	
@@ -212,7 +212,7 @@ public class QueueSim {
 						
 					} else if(s.charAt(0)=='d'){ //Line defines a destino
 						int chegada = s.indexOf(':');
-						definedestino(estruturaFila, s.substring(chegada+1));
+						defineDestino(estruturaFila, s.substring(chegada+1));
 						
 					} else if(s.charAt(0)=='s') { //Line defines seeds for the rng
 						int chegada = s.indexOf(':');
@@ -266,7 +266,7 @@ public class QueueSim {
 					null); //destinos
 	}
 	
-	private void definedestino(ArrayList<QueueStructure> estruturaFila, String s) throws Exception {
+	private void defineDestino(ArrayList<QueueStructure> estruturaFila, String s) throws Exception {
 		String[] estruturaFilaConect = s.split("(->)");
 		
 		//Defines the origin queue whose destinos are being parsed
@@ -281,7 +281,7 @@ public class QueueSim {
 			String[] destAndProb = d.split("/");
 			String destName = destAndProb[0].trim();
 			if(destName.equals("S") || destName.equals("s")) { //destino is the system exit
-				dest = QueueStructure.EXIT;
+				dest = QueueStructure.FIM;
 			} else { //destino is one of the system's queues
 				dest = findQueue(estruturaFila, destName);
 			}

@@ -4,7 +4,7 @@ public class QueueStructure {
 	
 	/* Static variable representing a destination from a queue to the outside of the system.
 	 * See destinos ArrayList below.*/
-	public static final QueueStructure EXIT = new QueueStructure("EXIT", -1,-1,-1,-1,-1,-1,null); 
+	public static final QueueStructure FIM = new QueueStructure("FIM", -1,-1,-1,-1,-1,-1,null); 
 	
 	
 	public String id;
@@ -93,7 +93,7 @@ public class QueueStructure {
 	
 	public String toString() {
 		return String.format(
-				"servico:%d\ncapacidade:%d\nArrivals:%.1f to %.1f\nService:%.1f to %.1f\nTransfers clients to another queue:%b\n",
+				"Serviço:%d\nCapacidade:%d\nChegada:%.1f to %.1f\nServiço:%.1f to %.1f\nPassagem de clientes:%b\n",
 				servico, capacidade, minChegada, maxChegada, minServico, maxServico, (destinos!=null));
 	}
 	
