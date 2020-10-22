@@ -94,7 +94,7 @@ public class Simulador {
                 }
                 if(!dest.cheio()) {
                 	dest.addCliente();
-                	if(dest.agendaServicoNaChegada()) { //destino can serve another client.
+                	if(dest.agendaServicoNaChegada()) {
                 		totalalets -= agendaSaida(agendamento, dest, tempo, num);
                 	}
             	} else { //destino full. Client lost.

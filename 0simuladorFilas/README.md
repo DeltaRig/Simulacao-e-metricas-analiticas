@@ -32,6 +32,8 @@ Para rodar o simulador utilizar os comandos abaixo:
 
 
 
+
+
 O arquivo "filas" está comentado e ensina como funciona a sintaxe para definir uma rede de filas.
 
 ### Classes:
