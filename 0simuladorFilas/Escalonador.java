@@ -1,6 +1,6 @@
 import java.util.Comparator;
 
-/* Used to schedule events during simulation. */
+//Faz o agendamento dos eventos durante a simulação
 public class Escalonador implements Comparator<Escalonador> {
     
 	TipoEvento evento;
@@ -18,6 +18,7 @@ public class Escalonador implements Comparator<Escalonador> {
 		this.destino = destino;
 	}
 	
+	//Precisa?
 	public Escalonador(){}
 	
 	public static Escalonador chegada(double tempo, Fila destino) {
