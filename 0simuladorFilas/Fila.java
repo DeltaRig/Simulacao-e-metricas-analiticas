@@ -58,18 +58,18 @@ public class Fila {
 		return estadoAtualDaFila >= capacidade;
 	}
 	
-	public boolean canServeOnArrival() {
+	public boolean agendaServicoNaChegada() {
 		return estadoAtualDaFila <= servidores;
 	}
 	
-	public boolean canServeOnDeparture() {
+	public boolean agendaServicoNaSaida() {
 		return estadoAtualDaFila >= servidores;
 	}
 	
 	/* If client can enter the queue: increments estadoAtualDaFila, adds another state to stateTime if necessary
 	 * and returns true.
 	 * Otherwise: increments perda and returns false. */
-	public void addClient() {
+	public void addCliente() {
 		estadoAtualDaFila++;
 		/* If this is the first time the queue has entered this state, add the
 		 * state to the list of state times. */
@@ -78,7 +78,7 @@ public class Fila {
 		}
 	}
 	
-	public void removeClient() {
+	public void removeCliente() {
 		estadoAtualDaFila--;
 	}
 	

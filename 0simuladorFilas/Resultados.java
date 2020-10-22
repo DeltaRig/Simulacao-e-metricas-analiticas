@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 /* Records results of one simulation. These results can be combined into average results. */
-class SimulationReport {
+class Resultados {
     
 	String[] idFila;
 	String[] descricao;
@@ -13,7 +13,7 @@ class SimulationReport {
     //Used a double for cases where the report is an average of different results:
     double[] perda;
                        
-    public SimulationReport(String[] idFila, double t, ArrayList<ArrayList<Double>> st, double[] cl) {
+    public Resultados(String[] idFila, double t, ArrayList<ArrayList<Double>> st, double[] cl) {
         this.idFila = idFila;
     	tempoTotalSimulacao = t;
         temposDeEstado = st;
@@ -30,7 +30,7 @@ class SimulationReport {
                            "Estado: %d  Tempo: %.2f  Probabilidade: %.2f%%\n",
                            j, temposFila.get(j), 100*temposFila.get(j)/tempoTotalSimulacao));
         	}
-        	result.append(String.format("Perda: %.2f\n---------------------------\n", perda[i]));
+        	result.append(String.format("Perda: %.2f\n\n\n", perda[i]));
         }
         
         result.append(String.format("Tempo total de simulação: %.2f", tempoTotalSimulacao));
@@ -38,7 +38,7 @@ class SimulationReport {
     }
     
     /* Sums the results of the second report on the first report. */
-    public void sumSimulation(SimulationReport r) {
+    public void somaSimulacao(Resultados r) {
     	tempoTotalSimulacao += r.tempoTotalSimulacao;
     	
     	// For each queue simulated...

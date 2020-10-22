@@ -8,17 +8,16 @@ public class Escalonador implements Comparator<Escalonador> {
     Fila origem;
 	Fila destino;
 	
-	/* Arrivals require destino != null
-	 * Departures require origem != null
-	 * Passages require both origem and destino != null */
+	// Arrivals require destino != null
+	// Departures require origem != null
+	// Passages require both origem and destino != null
 	public Escalonador(TipoEvento evento, double tempo, Fila origem, Fila destino) {
 		this.evento = evento;
 		this.tempo = tempo;
 		this.origem = origem;
 		this.destino = destino;
 	}
-	
-	//Precisa?
+
 	public Escalonador(){}
 	
 	public static Escalonador chegada(double tempo, Fila destino) {

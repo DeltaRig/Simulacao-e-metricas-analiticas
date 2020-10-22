@@ -20,88 +20,82 @@ public class Simulador {
     	this.primChegada = primChegada;
     }
     
-    /* Constructs object from file. */
+    //Gera o objeto a partir do arquivo
     public Simulador(String nomeArquivo) throws Exception {
     	recebeArquivo(nomeArquivo);
     }
     
+	//Cria o relatório de Resultados acumulando os resultados de cada simulação.
 	public void iniciaSimulacao() {
-		/* Creates a new SimulationReport With all fields zeroed
-		 * This report will accumulate the results of every simulation.
-		 * Begin by creating the list containing, for each queue in the simulation,
-		 * the list of time spent on each state of said queue. Since a queue can have
-		 * infinite capacidade, this list is created containing empty lists
-		 * (lists with no times for any state). */
 		String[] idsFila = new String[estruturaFila.size()];
 		ArrayList<ArrayList<Double>> temposDeEstado = new ArrayList<>();
-		for(int i=0; i<estruturaFila.size(); i++) {
+		for(int i = 0; i < estruturaFila.size(); i++) {
 			temposDeEstado.add(new ArrayList<Double>());
 			idsFila[i] = estruturaFila.get(i).id;
 		}
-		SimulationReport res = new SimulationReport(idsFila, 0.0, temposDeEstado, new double[estruturaFila.size()]);
+		Resultados res = new Resultados(idsFila, 0.0, temposDeEstado, new double[estruturaFila.size()]);
 		
 		
 		for(long s : sementes) {
-			SimulationReport tempo = runSimulation(s, alets);
-			res.sumSimulation(tempo);
+			Resultados tempo = iniciaSimulacao(s, alets);
+			res.somaSimulacao(tempo);
 		}
-		/* Divide the accumulated results by the number of simulations run to obtain
-		 * the average of the results. */
+		//Obtém a média dos resultados através da divisão dos resultados acumulados pelo nº 
 		res.reiniciaVariaveisDaSimulador(sementes.size());
-		System.out.printf("Printing average results of %d simulations:\n", sementes.size());
+		System.out.printf("Resultados de %d simulações:\n", sementes.size());
 		System.out.println(res.toString());
 	}
 	
-	private SimulationReport runSimulation(long sementeAleatoria, int totalalets) {
+	private Resultados iniciaSimulacao(long sementeAleatoria, int totalalets) {
 		
-		//evento schedule
-		Comparator<Escalonador> schComparator = new Escalonador();
-		PriorityQueue<Escalonador> schedule = new PriorityQueue<>(schComparator);
-		//First arrivals are offered to the schedule
-        for(Escalonador se : primChegada) {
-        	schedule.offer(se);
+		//Agenda os eventos e fornece as primeiras chegadas
+		Comparator<Escalonador> comparadorAgendamento = new Escalonador();
+		PriorityQueue<Escalonador> agendamento = new PriorityQueue<>(comparadorAgendamento);
+		
+        for(Escalonador x : primChegada) {
+        	agendamento.offer(x);
         }
                
-        GeradorNumerosAleatorios rng = new GeradorNumerosAleatorios(sementeAleatoria);
+        GeradorNumerosAleatorios num = new GeradorNumerosAleatorios(sementeAleatoria);
         double tempo = 0;
         
         while(totalalets > 0) {
             
-            //Process next scheduled evento
-            Escalonador se = schedule.poll();
-            double variacaoTempo = se.tempo - tempo;
-            for(Fila q : estruturaFila) {
-            	q.atualizaTempoFila(variacaoTempo);
+            //Executa o próximo agendado
+            Escalonador esc = agendamento.poll();
+            double variacaoTempo = esc.tempo - tempo;
+            for(Fila f : estruturaFila) {
+            	f.atualizaTempoFila(variacaoTempo);
             }
-            tempo += variacaoTempo; //update simulation clock
+            tempo += variacaoTempo; //Atualiza o tempo de simulação
             
             
-            if(se.evento == TipoEvento.CHEGADA) {
-                Fila dest = se.destino;
-            	if(!dest.cheio()) { //Queue can receive the client
-                    dest.addClient();
-                    if(dest.canServeOnArrival()) { //Queue can serve the client
-                        totalalets -= scheduleDeparture(schedule, dest, tempo, rng);
+            if(esc.evento == TipoEvento.CHEGADA) {
+                Fila dest = esc.destino;
+            	if(!dest.cheio()) { //Fila apta para receber o cliente
+                    dest.addCliente();
+                    if(dest.agendaServicoNaChegada()) { //Fila apta para atender o cliente
+                        totalalets -= agendaSaida(agendamento, dest, tempo, num);
                     }
-                } else { //Queue full
+                } else { //Fila cheia
                     dest.perda++;
                 }
-                scheduleArrival(schedule, dest, tempo, rng);
+                agendaChegada(agendamento, dest, tempo, num);
                 totalalets--;
             
             
             
-            } else if(se.evento == TipoEvento.PASSAGEM) {
-            	Fila ori = se.origem;
-            	Fila dest = se.destino;
-            	ori.removeClient();
-                if(ori.canServeOnDeparture()) { //Origin can serve another client.
-                	totalalets -= scheduleDeparture(schedule, ori, tempo, rng);
+            } else if(esc.evento == TipoEvento.PASSAGEM) {
+            	Fila origem = esc.origem;
+            	Fila dest = esc.destino;
+            	origem.removeCliente();
+                if(origem.agendaServicoNaSaida()) { //Pode atender outro cliente
+                	totalalets -= agendaSaida(agendamento, origem, tempo, num);
                 }
-                if(!dest.cheio()) { //destino can take another client.
-                	dest.addClient();
-                	if(dest.canServeOnArrival()) { //destino can serve another client.
-                		totalalets -= scheduleDeparture(schedule, dest, tempo, rng);
+                if(!dest.cheio()) {
+                	dest.addCliente();
+                	if(dest.agendaServicoNaChegada()) { //destino can serve another client.
+                		totalalets -= agendaSaida(agendamento, dest, tempo, num);
                 	}
             	} else { //destino full. Client lost.
             		dest.perda++;
@@ -110,10 +104,10 @@ public class Simulador {
             
                 
             } else { //It's a departure
-            	Fila ori = se.origem;
-            	ori.removeClient();
-            	if(ori.canServeOnDeparture()) { //Can serve one more client
-            		totalalets -= scheduleDeparture(schedule, ori, tempo, rng);
+            	Fila ori = esc.origem;
+            	ori.removeCliente();
+            	if(ori.agendaServicoNaSaida()) { //Can serve one more client
+            		totalalets -= agendaSaida(agendamento, ori, tempo, num);
             	}
             }
         }
@@ -128,57 +122,57 @@ public class Simulador {
         	perda[i] = estruturaFila.get(i).perda;
         }
         
-        SimulationReport sr = new SimulationReport(idsFila, tempo, tempoFilas, perda);
+        Resultados sr = new Resultados(idsFila, tempo, tempoFilas, perda);
         
         //Reset the state of all queues.
-        for(Fila q : estruturaFila) {
-        	q.reiniciaVariaveisDaSimulador();
+        for(Fila f : estruturaFila) {
+        	f.reiniciaVariaveisDaSimulador();
         }
         
         return sr;
 	}
 	
-	private void scheduleArrival(PriorityQueue<Escalonador> escalonador, Fila destino, double time, GeradorNumerosAleatorios rng) {
-		double randomNumber = rng.next();
-		double eventoTime = time + (destino.maxChegada - destino.minChegada) * randomNumber + destino.minChegada;
+	private void agendaChegada(PriorityQueue<Escalonador> escalonador, Fila destino, double time, GeradorNumerosAleatorios alet) {
+		double numAlet = alet.next();
+		double eventoTime = time + (destino.maxChegada - destino.minChegada) * numAlet + destino.minChegada;
 		escalonador.offer(Escalonador.chegada(eventoTime, destino));
 	}
 	
-	private int scheduleDeparture(PriorityQueue<Escalonador> escalonador, Fila origin, double time, GeradorNumerosAleatorios rng) {
+	private int agendaSaida(PriorityQueue<Escalonador> escalonador, Fila filaDeOrigem, double tempo, GeradorNumerosAleatorios alet) {
 		//Define evento time
-		double randomNumber = rng.next();
+		double numAlet = alet.next();
 		int aletsUsado = 1;
-		double eventoTime = time + (origin.maxServico-origin.minServico) * randomNumber + origin.minServico;
+		double eventoTime = tempo + (filaDeOrigem.maxServico-filaDeOrigem.minServico) * numAlet + filaDeOrigem.minServico;
 		
 		Fila dest = null;
 		/* If more than one possible destino, roll the probabilities.
 		 * This consumes an extra random number. */
-		if(origin.destinos.size()>1) {
-			double randomProb = rng.next();
+		if(filaDeOrigem.destinos.size()>1) {
+			double randomProb = alet.next();
 			aletsUsado++;
-			double prob = 0;
+			double probabilidade = 0;
 			/* Probability check works like this:
 			 * Add p1 to prob. Check if random is lower. If not, add p2 to prob and check again.
 			 * If not, add p3 and check again and so on. If at any check the random is lower,
 			 * the corresponding destino is chosen.*/
-			for(int i = 0; i<origin.probabilidadeDestino.size(); i++) {
-				prob += origin.probabilidadeDestino.get(i);
-				if(randomProb < prob) {
-					dest = origin.destinos.get(i);
+			for(int i = 0; i<filaDeOrigem.probabilidadeDestino.size(); i++) {
+				probabilidade += filaDeOrigem.probabilidadeDestino.get(i);
+				if(randomProb < probabilidade) {
+					dest = filaDeOrigem.destinos.get(i);
 					break;
 				}
 			}
 		
 		// Else there's only one possible destino
 		} else {
-			dest = origin.destinos.get(0);
+			dest = filaDeOrigem.destinos.get(0);
 		}
 		
 		//Generate schedule eventos accordingly
 		if(dest == Fila.FIM) {//Departure from the system
-			escalonador.offer(Escalonador.saida(eventoTime, origin));
+			escalonador.offer(Escalonador.saida(eventoTime, filaDeOrigem));
 		} else { //Passage from one queue to another
-			escalonador.offer(Escalonador.passagem(eventoTime, origin, dest));
+			escalonador.offer(Escalonador.passagem(eventoTime, filaDeOrigem, dest));
 		}
 		
 		return aletsUsado;
@@ -196,29 +190,29 @@ public class Simulador {
 			sementes = new ArrayList<>();
 			primChegada = new ArrayList<>();
 			String data = new String(Files.readAllBytes(Paths.get(nomeArquivo)));
-			String[] lines = data.split("(\r\n)|\n");
+			String[] lines = data.split("(\r\n)|\n"); 
 			for(int i=0; i<lines.length; i++) {
 				try {
 					String s = lines[i];
-					if(s.length()==0 || s.charAt(0)=='#') { //Empty or comment line
+					if(s.length()==0 || s.charAt(0)=='#') { //linha de comentario então não precisa fazer nenhuma outra verificação
 						continue;
 						
-					} else if(s.charAt(0)=='q') { //Line defines a queue
-						estruturaFila.add(createQueue(s));
+					} else if(s.charAt(0)=='q') { //Nessa linha aparece uma fila
+						estruturaFila.add(criaFila(s));
 						
-					} else if(s.charAt(0)=='d'){ //Line defines a destino
+					} else if(s.charAt(0)=='d'){ //Nessa linha aparece destino
 						int chegada = s.indexOf(':');
 						defineDestino(estruturaFila, s.substring(chegada+1));
 						
-					} else if(s.charAt(0)=='s') { //Line defines sementes for the rng
+					} else if(s.charAt(0)=='s') { //Nessa linha aparecem as sementes
 						int chegada = s.indexOf(':');
 						defineSementes(s.substring(chegada+1));
 					
-					} else if(s.charAt(0)=='r') { //Line defines the amount of alets to be used
+					} else if(s.charAt(0)=='a') { //Quantidade de aleatorios usados
 						int chegada = s.indexOf(':');
 						alets = Integer.parseInt(s.substring(chegada+1).trim());
 						
-					} else if(s.charAt(0)=='f') { //Line defines the first arrivals for the queues
+					} else if(s.charAt(0)=='p') { //Nessa linha é definido a primeira chegada
 						int chegada = s.indexOf(':');
 						defineprimChegada(s.substring(chegada+1));
 						
@@ -233,7 +227,7 @@ public class Simulador {
 			}
 			
 			if(primChegada.isEmpty()) {
-				throw new Exception("No first arrivals were defined for any queue in the system.");
+				throw new Exception("Não foi definido a primeira chegada");
 			}
 		} catch(IOException e) {
 			System.out.println(e.getMessage());
@@ -241,12 +235,12 @@ public class Simulador {
 		}
 	}
 	
-	private Fila createQueue(String s) throws Exception {
+	private Fila criaFila(String s) throws Exception {
 		
 			String[] splitOnColon = s.replaceAll("\\s", "").split(":");
 			String[] parametros = splitOnColon[1].split("/");
 			int capacidade;
-			if(parametros[1].equals("inf")) {
+			if(parametros[1].equals("inf")) { //referece a infinito
 				capacidade = Integer.MAX_VALUE;
 			} else {
 				capacidade = Integer.parseInt(parametros[1]);
