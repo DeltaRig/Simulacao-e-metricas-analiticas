@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 
 public class Simulador {
 	
-	
     private ArrayList<Fila> estruturaFila;
     private ArrayList<Long> sementes;
     private int alets;
@@ -26,7 +25,7 @@ public class Simulador {
     	recebeArquivo(nomeArquivo);
     }
     
-	public void runSimulation() {
+	public void iniciaSimulacao() {
 		/* Creates a new SimulationReport With all fields zeroed
 		 * This report will accumulate the results of every simulation.
 		 * Begin by creating the list containing, for each queue in the simulation,
@@ -42,18 +41,18 @@ public class Simulador {
 		SimulationReport res = new SimulationReport(idsFila, 0.0, temposDeEstado, new double[estruturaFila.size()]);
 		
 		
-		for(long r : sementes) {
-			SimulationReport tempo = runSimulation(r, alets);
+		for(long s : sementes) {
+			SimulationReport tempo = runSimulation(s, alets);
 			res.sumSimulation(tempo);
 		}
 		/* Divide the accumulated results by the number of simulations run to obtain
 		 * the average of the results. */
-		res.averageResults(sementes.size());
+		res.reiniciaVariaveisDaSimulador(sementes.size());
 		System.out.printf("Printing average results of %d simulations:\n", sementes.size());
 		System.out.println(res.toString());
 	}
 	
-	private SimulationReport runSimulation(long aletseed, int totalalets) {
+	private SimulationReport runSimulation(long sementeAleatoria, int totalalets) {
 		
 		//evento schedule
 		Comparator<Escalonador> schComparator = new Escalonador();
@@ -63,7 +62,7 @@ public class Simulador {
         	schedule.offer(se);
         }
                
-        GeradorNumerosAleatorios rng = new GeradorNumerosAleatorios(aletseed);
+        GeradorNumerosAleatorios rng = new GeradorNumerosAleatorios(sementeAleatoria);
         double tempo = 0;
         
         while(totalalets > 0) {
@@ -72,14 +71,14 @@ public class Simulador {
             Escalonador se = schedule.poll();
             double variacaoTempo = se.tempo - tempo;
             for(Fila q : estruturaFila) {
-            	q.updateQueueTimes(variacaoTempo);
+            	q.atualizaTempoFila(variacaoTempo);
             }
             tempo += variacaoTempo; //update simulation clock
             
             
             if(se.evento == TipoEvento.CHEGADA) {
                 Fila dest = se.destino;
-            	if(!dest.isFull()) { //Queue can receive the client
+            	if(!dest.cheio()) { //Queue can receive the client
                     dest.addClient();
                     if(dest.canServeOnArrival()) { //Queue can serve the client
                         totalalets -= scheduleDeparture(schedule, dest, tempo, rng);
@@ -99,7 +98,7 @@ public class Simulador {
                 if(ori.canServeOnDeparture()) { //Origin can serve another client.
                 	totalalets -= scheduleDeparture(schedule, ori, tempo, rng);
                 }
-                if(!dest.isFull()) { //destino can take another client.
+                if(!dest.cheio()) { //destino can take another client.
                 	dest.addClient();
                 	if(dest.canServeOnArrival()) { //destino can serve another client.
                 		totalalets -= scheduleDeparture(schedule, dest, tempo, rng);
@@ -133,7 +132,7 @@ public class Simulador {
         
         //Reset the state of all queues.
         for(Fila q : estruturaFila) {
-        	q.resetSimulationVariables();
+        	q.reiniciaVariaveisDaSimulador();
         }
         
         return sr;
@@ -142,7 +141,7 @@ public class Simulador {
 	private void scheduleArrival(PriorityQueue<Escalonador> escalonador, Fila destino, double time, GeradorNumerosAleatorios rng) {
 		double randomNumber = rng.next();
 		double eventoTime = time + (destino.maxChegada - destino.minChegada) * randomNumber + destino.minChegada;
-		escalonador.offer(Escalonador.newArrival(eventoTime, destino));
+		escalonador.offer(Escalonador.chegada(eventoTime, destino));
 	}
 	
 	private int scheduleDeparture(PriorityQueue<Escalonador> escalonador, Fila origin, double time, GeradorNumerosAleatorios rng) {
@@ -177,9 +176,9 @@ public class Simulador {
 		
 		//Generate schedule eventos accordingly
 		if(dest == Fila.FIM) {//Departure from the system
-			escalonador.offer(Escalonador.newDeparture(eventoTime, origin));
+			escalonador.offer(Escalonador.saida(eventoTime, origin));
 		} else { //Passage from one queue to another
-			escalonador.offer(Escalonador.newPassage(eventoTime, origin, dest));
+			escalonador.offer(Escalonador.passagem(eventoTime, origin, dest));
 		}
 		
 		return aletsUsado;
@@ -268,7 +267,7 @@ public class Simulador {
 		
 		//Defines the origin queue whose destinos are being parsed
 		String nomeOrigem = estruturaFilaConect[0].trim();
-		Fila origem = findQueue(estruturaFila, nomeOrigem);
+		Fila origem = buscaFila(estruturaFila, nomeOrigem);
 		
 		//Parse destinos
 		String[] destinos = estruturaFilaConect[1].split(",");
@@ -280,7 +279,7 @@ public class Simulador {
 			if(destName.equals("S") || destName.equals("s")) { //destino is the system exit
 				dest = Fila.FIM;
 			} else { //destino is one of the system's queues
-				dest = findQueue(estruturaFila, destName);
+				dest = buscaFila(estruturaFila, destName);
 			}
 			origem.destinos.add(dest);
 			origem.probabilidadeDestino.add(Double.parseDouble(destAndProb[1]));
@@ -294,7 +293,7 @@ public class Simulador {
 		}
 	}
 	
-	private Fila findQueue(ArrayList<Fila> estruturaFila, String nome) throws Exception{
+	private Fila buscaFila(ArrayList<Fila> estruturaFila, String nome) throws Exception{
 		for(Fila f : estruturaFila) {
 			if(f.id.equals(nome)) return f;
 		}
@@ -314,8 +313,8 @@ public class Simulador {
 		for(String s : str.replaceAll("\\s", "").split(",")) {
 			String[] filaArr = s.split("/");
 			double tempo = Double.parseDouble(filaArr[1]);
-			Fila f = findQueue(estruturaFila, filaArr[0]);
-			primChegada.add(Escalonador.newArrival(tempo, f));
+			Fila f = buscaFila(estruturaFila, filaArr[0]);
+			primChegada.add(Escalonador.chegada(tempo, f));
 		}
 	}
 }

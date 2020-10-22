@@ -4,6 +4,7 @@ import java.util.ArrayList;
 class SimulationReport {
     
 	String[] idFila;
+	String[] descricao;
 	double tempoTotalSimulacao;
     /* This list holds, for each queue in the simulation, a list of
      * the times it spent on each of it's respective states. */
@@ -20,20 +21,20 @@ class SimulationReport {
     }
     
     public String toString() {
-        StringBuilder res = new StringBuilder(500);
+        StringBuilder result = new StringBuilder(500);
         for(int i = 0; i < temposDeEstado.size(); i++) {
         	ArrayList<Double> temposFila = temposDeEstado.get(i);
-            res.append("Fila " + idFila[i]+":\n");
-        	for(int j=0; j<temposFila.size(); j++) {
-        		res.append(String.format(
+            result.append("Fila " + idFila[i]+":\n");
+        	for(int j=0; j < temposFila.size(); j++) {
+        		result.append(String.format(
                            "Estado: %d  Tempo: %.2f  Probabilidade: %.2f%%\n",
                            j, temposFila.get(j), 100*temposFila.get(j)/tempoTotalSimulacao));
         	}
-        	res.append(String.format("Perda: %.2f\n---------------------------\n", perda[i]));
+        	result.append(String.format("Perda: %.2f\n---------------------------\n", perda[i]));
         }
         
-        res.append(String.format("Tempo total de simulação: %.2f", tempoTotalSimulacao));
-        return res.toString();
+        result.append(String.format("Tempo total de simulação: %.2f", tempoTotalSimulacao));
+        return result.toString();
     }
     
     /* Sums the results of the second report on the first report. */
@@ -41,7 +42,7 @@ class SimulationReport {
     	tempoTotalSimulacao += r.tempoTotalSimulacao;
     	
     	// For each queue simulated...
-    	for(int i=0; i<temposDeEstado.size(); i++) {
+    	for(int i = 0; i < temposDeEstado.size(); i++) {
     		// sum the number of clients lost
     		perda[i] += r.perda[i];
     		
@@ -51,14 +52,14 @@ class SimulationReport {
     		ArrayList<Double> temposFila1 = temposDeEstado.get(i);
     		ArrayList<Double> temposFila2 = r.temposDeEstado.get(i);
     		comparadorArrays(temposFila1, temposFila2); //Make list sizes equal
-    		for(int j=0; j<temposFila1.size(); j++) {
+    		for(int j = 0; j<temposFila1.size(); j++) {
     			temposFila1.set(j, temposFila1.get(j) + temposFila2.get(j));
     		}
     	}
     }
     
     /* Divides the fields of the report by n. */
-    public void averageResults(int n) {
+    public void reiniciaVariaveisDaSimulador(int n) {
     	tempoTotalSimulacao /= n;
     	for(int i=0; i < temposDeEstado.size(); i++) {
     		perda[i] /= n;

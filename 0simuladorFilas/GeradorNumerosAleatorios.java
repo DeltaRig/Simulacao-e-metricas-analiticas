@@ -16,7 +16,6 @@ public class GeradorNumerosAleatorios {
     //correção feita (usar um método next)
     public double next() {
         x = Long.remainderUnsigned(a * x + c , (long) m);
-        double resposta = x / (double)m;
-        return resposta; // retorna um aleátorio entre 1 e 0
+        return  x / m; // retorna um aleátorio entre 1 e 0
     }
 }

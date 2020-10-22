@@ -10,7 +10,7 @@ public class App {
 		}
 		
 		Simulador simulador = new Simulador(nomeArquivo);
-		simulador.runSimulation();
+		simulador.iniciaSimulacao();
 		
 	}
 

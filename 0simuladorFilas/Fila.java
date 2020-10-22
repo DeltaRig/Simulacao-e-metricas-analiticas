@@ -8,7 +8,7 @@ public class Fila {
 	
 	
 	public String id;
-    public int servico;
+    public int servidores;
     public int capacidade;
     
     //Time intervals for events
@@ -27,74 +27,77 @@ public class Fila {
     //------------------------------------------------------------
     /* Because the capacidade of the queue can be infinite, the list containing
      * the time spent on each state cannot be defined before runtime. It might grow
-     * with each client arrival. Therefore I've decided to keep currentQueueSize private
+     * with each client arrival. Therefore I've decided to keep estadoAtualDaFila private
      * and provide methods to modify it.*/
-    private int currentQueueSize;
+    private int estadoAtualDaFila;
     // List that keeps track of the amount of time the queue spent in each given state:
     public ArrayList<Double> temposDeEstado;
     public int perda;
     
-	public Fila(String id, int servico, int capacidade, double minChegada, double maxChegada, double minServico,
+	public Fila(String id, int servidores, int capacidade, double minChegada, double maxChegada, double minServico,
 			double maxServico, ArrayList<Fila> destinos) {
 		this.id = id;
-		this.servico = servico;
+		this.servidores = servidores;
 		this.capacidade = capacidade;
 		this.minChegada = minChegada;
 		this.maxChegada = maxChegada;
 		this.minServico = minServico;
 		this.maxServico = maxServico;
+
 		if(destinos==null) {
 			this.destinos = new ArrayList<>();
 		} else {
 			this.destinos = destinos;
 		}
+
 		this.probabilidadeDestino = new ArrayList<>();
-		resetSimulationVariables();
+		reiniciaVariaveisDaSimulador();
 	}
 	
-	public boolean isFull() {
-		return currentQueueSize>=capacidade;
+	public boolean cheio() {
+		return estadoAtualDaFila >= capacidade;
 	}
 	
 	public boolean canServeOnArrival() {
-		return currentQueueSize <= servico;
+		return estadoAtualDaFila <= servidores;
 	}
 	
 	public boolean canServeOnDeparture() {
-		return currentQueueSize >= servico;
+		return estadoAtualDaFila >= servidores;
 	}
 	
-	/* If client can enter the queue: increments currentQueueSize, adds another state to stateTime if necessary
+	/* If client can enter the queue: increments estadoAtualDaFila, adds another state to stateTime if necessary
 	 * and returns true.
 	 * Otherwise: increments perda and returns false. */
 	public void addClient() {
-		currentQueueSize++;
+		estadoAtualDaFila++;
 		/* If this is the first time the queue has entered this state, add the
 		 * state to the list of state times. */
-		if(temposDeEstado.size()<currentQueueSize+1) {
+		if(temposDeEstado.size()<estadoAtualDaFila+1) {
 			temposDeEstado.add(0.0);
 		}
 	}
 	
 	public void removeClient() {
-		currentQueueSize--;
+		estadoAtualDaFila--;
 	}
 	
-	public void updateQueueTimes(double variacaoTempo) {
-		temposDeEstado.set(currentQueueSize, temposDeEstado.get(currentQueueSize) + variacaoTempo);
+	public void atualizaTempoFila(double variacaoTempo) {
+		temposDeEstado.set(estadoAtualDaFila, temposDeEstado.get(estadoAtualDaFila) + variacaoTempo);
 	}
 	
-	public void resetSimulationVariables() {
-		currentQueueSize = 0;
+	public void reiniciaVariaveisDaSimulador() {
+		estadoAtualDaFila = 0;
 		temposDeEstado = new ArrayList<>();
 		temposDeEstado.add(0.0); //Add time for the beginning state 0.
 		perda = 0;
 	}
 	
+	@Override
 	public String toString() {
 		return String.format(
-				"Serviço:%d\nCapacidade:%d\nChegada:%.1f to %.1f\nServiço:%.1f to %.1f\nPassagem de clientes:%b\n",
-				servico, capacidade, minChegada, maxChegada, minServico, maxServico, (destinos!=null));
+				"Serviço:%d \nCapacidade:%d \nChegada:%.1f a %.1f \nServiço:%.1f a %.1f \nPassagem de clientes:%b\n",
+				servidores, capacidade, minChegada, maxChegada, minServico, maxServico, (destinos != null));
 	}
 	
 	

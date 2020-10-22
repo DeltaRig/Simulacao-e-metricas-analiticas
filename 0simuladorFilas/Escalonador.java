@@ -20,20 +20,20 @@ public class Escalonador implements Comparator<Escalonador> {
 	
 	public Escalonador(){}
 	
-	public static Escalonador newArrival(double tempo, Fila destino) {
+	public static Escalonador chegada(double tempo, Fila destino) {
 		return new Escalonador(TipoEvento.CHEGADA, tempo, null, destino);
 	}
-	public static Escalonador newDeparture(double tempo, Fila origem) {
+	public static Escalonador saida(double tempo, Fila origem) {
 		return new Escalonador(TipoEvento.SAIDA, tempo, origem, Fila.FIM);
 	}
-	public static Escalonador newPassage(double tempo, Fila origem, Fila destino) {
+	public static Escalonador passagem(double tempo, Fila origem, Fila destino) {
 		return new Escalonador(TipoEvento.PASSAGEM, tempo, origem, destino);
 	}
 	
-	public int compare(Escalonador se1, Escalonador se2) {
-        if(se1.tempo < se2.tempo)
+	public int compare(Escalonador esc, Escalonador outroEsc) {
+        if(esc.tempo < outroEsc.tempo)
             return -1;
-        if(se1.tempo > se2.tempo)
+        if(esc.tempo > outroEsc.tempo)
             return 1;
         return 0;
     }
