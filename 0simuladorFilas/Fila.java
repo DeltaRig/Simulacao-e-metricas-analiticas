@@ -2,35 +2,24 @@ import java.util.ArrayList;
 
 public class Fila {
 	
-	/* Static variable representing a destination from a queue to the outside of the system.
-	 * See destinos ArrayList below.*/
 	public static final Fila FIM = new Fila("FIM", -1,-1,-1,-1,-1,-1,null); 
-	
 	
 	public String id;
     public int servidores;
     public int capacidade;
     
-    //Time intervals for events
     public double minChegada;
     public double maxChegada;
     public double minServico;
     public double maxServico;
     
-    // A queue may have one or more destinos for departure
     public ArrayList<Fila> destinos;
-    // Each destination has it's corresponding routing probability
     public ArrayList<Double> probabilidadeDestino;
     
-    //------------------------------------------------------------
-    // Simulation state variables
-    //------------------------------------------------------------
-    /* Because the capacidade of the queue can be infinite, the list containing
-     * the time spent on each state cannot be defined before runtime. It might grow
-     * with each client arrival. Therefore I've decided to keep estadoAtualDaFila private
-     * and provide methods to modify it.*/
+	/*estadoAtualDaFila ficará privado devido ao fato da fila poder ser infinita,
+	 *não sendo possível definir o tempo gasto antes do tempo de execução.
+	 *Será modificada através de métodos conforme a necessidade.*/
     private int estadoAtualDaFila;
-    // List that keeps track of the amount of time the queue spent in each given state:
     public ArrayList<Double> temposDeEstado;
     public int perda;
     
@@ -66,13 +55,12 @@ public class Fila {
 		return estadoAtualDaFila >= servidores;
 	}
 	
-	/* If client can enter the queue: increments estadoAtualDaFila, adds another state to stateTime if necessary
-	 * and returns true.
-	 * Otherwise: increments perda and returns false. */
+	/*Verifica se o cliente pode entrar na fila e incrementa estadoAtualDaFila.
+	 *Adiciona outro estado de tempo se for necessário.
+	 *Caso não possa o cliente é perdido e retorna falso. */
 	public void addCliente() {
 		estadoAtualDaFila++;
-		/* If this is the first time the queue has entered this state, add the
-		 * state to the list of state times. */
+		
 		if(temposDeEstado.size()<estadoAtualDaFila+1) {
 			temposDeEstado.add(0.0);
 		}
@@ -89,7 +77,7 @@ public class Fila {
 	public void reiniciaVariaveisDaSimulador() {
 		estadoAtualDaFila = 0;
 		temposDeEstado = new ArrayList<>();
-		temposDeEstado.add(0.0); //Add time for the beginning state 0.
+		temposDeEstado.add(0.0);
 		perda = 0;
 	}
 	

@@ -25,7 +25,7 @@ public class Simulador {
     	recebeArquivo(nomeArquivo);
     }
     
-	//Cria o relatório de Resultados acumulando os resultados de cada simulação.
+	//Cria o relatório de resultados acumulando os resultados de cada simulação.
 	public void iniciaSimulacao() {
 		String[] idsFila = new String[estruturaFila.size()];
 		ArrayList<ArrayList<Double>> temposDeEstado = new ArrayList<>();
@@ -40,7 +40,9 @@ public class Simulador {
 			Resultados tempo = iniciaSimulacao(s, alets);
 			res.somaSimulacao(tempo);
 		}
-		//Obtém a média dos resultados através da divisão dos resultados acumulados pelo nº 
+
+		//Obtém a média dos resultados através da divisão dos resultados acumulados pelo nº
+		//de simulações executadas.
 		res.reiniciaVariaveisDaSimulador(sementes.size());
 		System.out.printf("Resultados de %d simulações:\n", sementes.size());
 		System.out.println(res.toString());
@@ -97,22 +99,22 @@ public class Simulador {
                 	if(dest.agendaServicoNaChegada()) {
                 		totalalets -= agendaSaida(agendamento, dest, tempo, num);
                 	}
-            	} else { //destino full. Client lost.
+            	} else { //Cliente perdido, destino está cheio
             		dest.perda++;
             	}
             
             
                 
-            } else { //It's a departure
+            } else {
             	Fila ori = esc.origem;
             	ori.removeCliente();
-            	if(ori.agendaServicoNaSaida()) { //Can serve one more client
+            	if(ori.agendaServicoNaSaida()) { //Pode atender mais um cliente
             		totalalets -= agendaSaida(agendamento, ori, tempo, num);
             	}
             }
         }
         
-        //Simulation finished. Make report.
+        //Fim da simulação, gera o relatório.
         ArrayList<ArrayList<Double>> tempoFilas = new ArrayList<>();
         double[] perda = new double[estruturaFila.size()];
         String[] idsFila = new String[estruturaFila.size()];
@@ -123,8 +125,8 @@ public class Simulador {
         }
         
         Resultados sr = new Resultados(idsFila, tempo, tempoFilas, perda);
-        
-        //Reset the state of all queues.
+		
+		//Zera o estado de todas as filas
         for(Fila f : estruturaFila) {
         	f.reiniciaVariaveisDaSimulador();
         }
@@ -145,16 +147,14 @@ public class Simulador {
 		double eventoTime = tempo + (filaDeOrigem.maxServico-filaDeOrigem.minServico) * numAlet + filaDeOrigem.minServico;
 		
 		Fila dest = null;
-		/* If more than one possible destino, roll the probabilities.
-		 * This consumes an extra random number. */
+	    //Caso encontre mais de um caminho possível, lista as probabilidades e consome um aleatório
 		if(filaDeOrigem.destinos.size()>1) {
 			double randomProb = alet.next();
 			aletsUsado++;
 			double probabilidade = 0;
-			/* Probability check works like this:
-			 * Add p1 to prob. Check if random is lower. If not, add p2 to prob and check again.
-			 * If not, add p3 and check again and so on. If at any check the random is lower,
-			 * the corresponding destino is chosen.*/
+			//Adiciona p1 na lista, vê se aleatório é menor. Se não, adiciona p2 e verifica de novo.
+			//Segue verificando e adicionando até encontrar um aleatório menor.
+			//Quando encontrar o aleatório menor é definido o destino.
 			for(int i = 0; i<filaDeOrigem.probabilidadeDestino.size(); i++) {
 				probabilidade += filaDeOrigem.probabilidadeDestino.get(i);
 				if(randomProb < probabilidade) {
@@ -163,15 +163,14 @@ public class Simulador {
 				}
 			}
 		
-		// Else there's only one possible destino
 		} else {
 			dest = filaDeOrigem.destinos.get(0);
 		}
 		
-		//Generate schedule eventos accordingly
-		if(dest == Fila.FIM) {//Departure from the system
+		//Agenda os eventos
+		if(dest == Fila.FIM) {
 			escalonador.offer(Escalonador.saida(eventoTime, filaDeOrigem));
-		} else { //Passage from one queue to another
+		} else { //Mudança de fila
 			escalonador.offer(Escalonador.passagem(eventoTime, filaDeOrigem, dest));
 		}
 		
@@ -216,13 +215,13 @@ public class Simulador {
 						int chegada = s.indexOf(':');
 						defineprimChegada(s.substring(chegada+1));
 						
-					} else { //Sintax error
+					} else {
 						throw new Exception(
-								"Non empty line contains invalid syntax.");
+								"Erro de sintaxe inválida.");
 					}
 				} catch(Exception e) {
 					throw new Exception(String.format(
-							"Exception thrown during file parsing (file line: %d): %s", i+1, e.toString()));
+							"Erro encontrado durante a leitura do arquivo (file line: %d): %s", i+1, e.toString()));
 				}
 			}
 			
@@ -259,20 +258,19 @@ public class Simulador {
 	private void defineDestino(ArrayList<Fila> estruturaFila, String s) throws Exception {
 		String[] estruturaFilaConect = s.split("(->)");
 		
-		//Defines the origin queue whose destinos are being parsed
+		//Define a fila de origem analisando os destinos
 		String nomeOrigem = estruturaFilaConect[0].trim();
 		Fila origem = buscaFila(estruturaFila, nomeOrigem);
 		
-		//Parse destinos
 		String[] destinos = estruturaFilaConect[1].split(",");
-		//Add each destino with it's corresponding routing probability to the origin object
+
 		for(String d : destinos) {
 			Fila dest = null;
 			String[] destAndProb = d.split("/");
 			String destName = destAndProb[0].trim();
-			if(destName.equals("S") || destName.equals("s")) { //destino is the system exit
+			if(destName.equals("S") || destName.equals("s")) { //Destino é a saída
 				dest = Fila.FIM;
-			} else { //destino is one of the system's queues
+			} else { //Destino é uma das filas
 				dest = buscaFila(estruturaFila, destName);
 			}
 			origem.destinos.add(dest);
@@ -283,7 +281,7 @@ public class Simulador {
 			soma += p;
 		}
 		if(soma != 1.0) {
-			throw new Exception("The sum of all routing probabilities in a queue must equal 1.");
+			throw new Exception("A soma das probabilidades de roteamento de ser igual a 1.");
 		}
 	}
 	
@@ -292,7 +290,7 @@ public class Simulador {
 			if(f.id.equals(nome)) return f;
 		}
 		throw new Exception(String.format(
-				"Queue \"%s\" does not exist or wasn't previously defined in input file.", nome));
+				"A fila \"%s\" não foi definida no arquivo.", nome));
 		
 	}
 	

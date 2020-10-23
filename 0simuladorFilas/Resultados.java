@@ -1,16 +1,13 @@
 import java.util.ArrayList;
 
-/* Records results of one simulation. These results can be combined into average results. */
 class Resultados {
     
 	String[] idFila;
 	String[] descricao;
 	double tempoTotalSimulacao;
-    /* This list holds, for each queue in the simulation, a list of
-     * the times it spent on each of it's respective states. */
+
     ArrayList<ArrayList<Double>> temposDeEstado;
     
-    //Used a double for cases where the report is an average of different results:
     double[] perda;
                        
     public Resultados(String[] idFila, double t, ArrayList<ArrayList<Double>> st, double[] cl) {
@@ -37,28 +34,23 @@ class Resultados {
         return result.toString();
     }
     
-    /* Sums the results of the second report on the first report. */
     public void somaSimulacao(Resultados r) {
     	tempoTotalSimulacao += r.tempoTotalSimulacao;
     	
-    	// For each queue simulated...
+    	//Faz a soma de clientes perdidos para cada fila simulada e o tempo gasto nas simulações
     	for(int i = 0; i < temposDeEstado.size(); i++) {
-    		// sum the number of clients lost
     		perda[i] += r.perda[i];
     		
-    		/* and for each state of that queue, sum the time spent in both simulations.
-    		 * Since queues can have infinite capacity, states may differ.
-    		 * This must taken into account: */
     		ArrayList<Double> temposFila1 = temposDeEstado.get(i);
     		ArrayList<Double> temposFila2 = r.temposDeEstado.get(i);
-    		comparadorArrays(temposFila1, temposFila2); //Make list sizes equal
+    		comparadorArrays(temposFila1, temposFila2);
     		for(int j = 0; j<temposFila1.size(); j++) {
     			temposFila1.set(j, temposFila1.get(j) + temposFila2.get(j));
     		}
     	}
     }
-    
-    /* Divides the fields of the report by n. */
+	
+	//Faz a divisão dos campos por n
     public void reiniciaVariaveisDaSimulador(int n) {
     	tempoTotalSimulacao /= n;
     	for(int i=0; i < temposDeEstado.size(); i++) {
@@ -69,8 +61,8 @@ class Resultados {
     		}
     	}
     }
-    
-    /* Equalizes the size of two arrays by filling the smaller array with zeroes. */
+	
+	//Deixa as matrizes com tamanhos iguais, preenchendo com zeros a menor.
     private void comparadorArrays(ArrayList<Double> arr, ArrayList<Double> outroArr) {
     	while(arr.size()<outroArr.size())
 			arr.add(0.0);
