@@ -1,3 +1,9 @@
+/**
+ * Desenvolvedoras: Daniela Rigoli e Franciele Constante
+ * Turma: 128
+ * Professor: Afonso Sales
+*/
+
 import java.util.Comparator;
 
 //Faz o agendamento dos eventos durante a simulação

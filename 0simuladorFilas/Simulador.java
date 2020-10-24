@@ -1,3 +1,9 @@
+/**
+ * Desenvolvedoras: Daniela Rigoli e Franciele Constante
+ * Turma: 128
+ * Professor: Afonso Sales
+*/
+
 import java.util.PriorityQueue;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -196,7 +202,7 @@ public class Simulador {
 					if(s.length()==0 || s.charAt(0)=='#') { //linha de comentario então não precisa fazer nenhuma outra verificação
 						continue;
 						
-					} else if(s.charAt(0)=='q') { //Nessa linha aparece uma fila
+					} else if(s.charAt(0)=='f') { //Nessa linha aparece uma fila
 						estruturaFila.add(criaFila(s));
 						
 					} else if(s.charAt(0)=='d'){ //Nessa linha aparece destino

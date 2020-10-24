@@ -1,40 +1,19 @@
 Desenvolvedoras: Daniela Rigoli e Franciele Constante
+Turma: 128
+Professor: Afonso Sales
 
 # Trabalho 1 - Parte 1
 
 ### Descrição:
 O programa lê um arquivo com variáveis definidas e simulação de acordo com as especificações descritas no arquivo.
 
-### Para rodar
-Para rodar o simulador utilizar os comandos abaixo:
-
+### Como rodars
+Utilizando os comandos abaixo você poderá rodar o programa.
 >javac *.java
-
-
-
 
 >java App < nomeDoArquivo >
 
-É possível ler um arquivo diferente passando o nome do arquivo por linha de comando. O arquivo deve informar o valor da primeira chegada e as caracteriscas de cada fila obrigatóriamente para gerar uma simulação.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-O arquivo "filas" está comentado e ensina como funciona a sintaxe para definir uma rede de filas.
+Há a possibilidade de ler um arquivo diferente passando o nome deste arquivo pela linha de comando. No arquivo deve ser informado o valor da primeira chegada e as caracteriscas de cada fila devem aparecer obrigatóriamente para gerar uma simulação. Se não for informado nenhum nome de arquivo o programa irá ler o conteúdo do arquivo "filas".
 
 ### Classes:
 - App: Verifica se foi informado um arquivo e encaminho para o simulador.
