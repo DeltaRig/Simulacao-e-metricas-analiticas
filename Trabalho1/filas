@@ -26,7 +26,7 @@ dest: f3 -> f2/0.7 , S/0.3
 
 # Informe as sementes que serão utilizadas pelo gerador de números aleatórios conforme abaixo:
 
-sementes: 1, 2, 3, 4, 5
+sementes: 1
 
 # Informe a quantidade de números aleatórios que serão utilizados:
 

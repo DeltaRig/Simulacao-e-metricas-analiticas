@@ -1,0 +1,35 @@
+Resultados de 1 simulações:
+Fila f1:
+Estado: 0  Tempo: 14241,94  Probabilidade: 35,33%
+Estado: 1  Tempo: 20611,06  Probabilidade: 51,12%
+Estado: 2  Tempo: 4912,76  Probabilidade: 12,19%
+Estado: 3  Tempo: 525,88  Probabilidade: 1,30%
+Estado: 4  Tempo: 23,75  Probabilidade: 0,06%
+Estado: 5  Tempo: 0,80  Probabilidade: 0,00%
+Perda: 0,00
+
+
+Fila f2:
+Estado: 0  Tempo: 29,99  Probabilidade: 0,07%
+Estado: 1  Tempo: 432,81  Probabilidade: 1,07%
+Estado: 2  Tempo: 2498,56  Probabilidade: 6,20%
+Estado: 3  Tempo: 8791,07  Probabilidade: 21,81%
+Estado: 4  Tempo: 15122,33  Probabilidade: 37,51%
+Estado: 5  Tempo: 13441,44  Probabilidade: 33,34%
+Perda: 4598,00
+
+
+Fila f3:
+Estado: 0  Tempo: 3,76  Probabilidade: 0,01%
+Estado: 1  Tempo: 4,35  Probabilidade: 0,01%
+Estado: 2  Tempo: 2,86  Probabilidade: 0,01%
+Estado: 3  Tempo: 7,82  Probabilidade: 0,02%
+Estado: 4  Tempo: 31,23  Probabilidade: 0,08%
+Estado: 5  Tempo: 192,44  Probabilidade: 0,48%
+Estado: 6  Tempo: 2797,18  Probabilidade: 6,94%
+Estado: 7  Tempo: 12950,38  Probabilidade: 32,12%
+Estado: 8  Tempo: 24326,17  Probabilidade: 60,34%
+Perda: 6749,00
+
+
+Tempo total de simulação: 40316,20
