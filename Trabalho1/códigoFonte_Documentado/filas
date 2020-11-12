@@ -12,7 +12,7 @@
 # Para definir uma fila deve se iniciar com 'f'
 # Para definir a capacidade de uma fila infinita escreva "inf".
 
-f1:1/inf/1/4/1/1.5
+f1:1/5/1/4/1/1.5
 f2:3/5/0/0/5/10
 f3:2/8/0/0/10/20
 
