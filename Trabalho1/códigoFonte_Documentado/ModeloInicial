@@ -1,0 +1,41 @@
+# A entrada para o simulador é feita através de um arquivo.
+# Este arquivo deve conter:
+# - Formato das filas;
+# - Destino das filas;
+# - Sementes que serão utilizadas;
+# - Quantidade de aleatórios que serão simulados;
+# - Tempo da primeira chegada para receber clientes;
+
+# As filas devem ser definidas informando o nome da fila, nº de servidores, capacidade,
+# chegada mínima, chegada máxima, atendimento mínimo e atendimento máximo conforme modelo abaixo.
+# Defina as filas usando a sintaxe abaixo :
+# Para definir uma fila deve se iniciar com 'f'
+# Para definir a capacidade de uma fila infinita escreva "inf".
+
+fCaixaNormal:8/40/5/10/5/25
+fCaixaRapido:2/10/5/20/1/3
+fCaixaCentral:2/5/40/60/3/20
+fPadaria:2/10/5/7/3/10
+fAcougue:1/7/7/10/4/10
+
+# O destino das filas deve ser definido informando origem e destino e probabilidade de roteamento
+# conforme modelo abaixo.
+# Caso o destino seja a saída, utilizar "S". 
+
+dest: fCaixaNormal -> S/0.9 , fCaixaCentral/0.04 , fCaixaNormal/0.06
+dest: fCaixaRapido -> S/0.96 , fCaixaCentral/0.03 , fCaixaNormal/0.01
+dest: fCaixaCentral -> S/0.3 , fPadaria/0.1 , fAcougue/0.05, fCaixaNormal/0.3, fCaixaRapido/0.25
+dest: fPadaria -> fCaixaRapido/0.2 , fAcougue/0.3 , fCaixaNormal/0.5
+dest: fAcougue -> fCaixaRapido/0.1 , fPadaria/0.5 , fCaixaNormal/0.4
+
+# Informe as sementes que serão utilizadas pelo gerador de números aleatórios conforme abaixo:
+
+sementes: 1, 2, 3, 4, 5
+
+# Informe a quantidade de números aleatórios que serão utilizados:
+
+aleat: 100000
+
+# Informe quando ocorre a primeira chegada para fila com capacidade para receber clientes conforme modelo abaixo:
+
+primeiraChegada: fCaixaNormal/25, fCaixaCentral/59, fCaixaRapido/5, fAcougue/7, fPadaria/6
